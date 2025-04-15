@@ -6,6 +6,9 @@ import boto3
 from src.config import DevConfig, ProdConfig
 from src.routes import register_routes
 
+# load environment variables from .env
+load_dotenv()
+
 
 def start_app(config_class=DevConfig):
     app = Flask(__name__)
