@@ -172,3 +172,28 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Node.js
+node_modules/
+dist/
+*.log
+.vscode/
+.DS_Store
+
+# Vite
+.vite/
+.vitepress/
+*.local
+
+# React
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+*.code-workspace
