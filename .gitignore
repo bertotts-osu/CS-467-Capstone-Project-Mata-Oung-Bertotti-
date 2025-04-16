@@ -197,3 +197,6 @@ build/
 # VS Code
 .vscode/
 *.code-workspace
+
+# AWS
+backend/.ebextensions/python.config
