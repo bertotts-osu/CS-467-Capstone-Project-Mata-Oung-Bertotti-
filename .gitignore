@@ -200,3 +200,5 @@ build/
 
 # AWS
 backend/.ebextensions/python.config
+frontend/.env.development
+frontend/.env.production
