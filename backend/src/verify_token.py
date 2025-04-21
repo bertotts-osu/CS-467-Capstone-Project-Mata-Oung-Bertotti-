@@ -1,11 +1,10 @@
-import requests
 import jwt
 from jwt import PyJWKClient
-from flask import current_app, request
+from flask import current_app
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 
 
-def verify_token(token: str) -> dict:
+def verify_token(token: str) -> tuple:
     region = current_app.config["COGNITO_REGION"]
     user_pool_id = current_app.config["COGNITO_USER_POOL_ID"]
     jwks_url = f"https://cognito-idp.{region}.amazonaws.com/{user_pool_id}/.well-known/jwks.json"
@@ -30,12 +29,10 @@ def verify_token(token: str) -> dict:
         #   * chosen by Cognito
 
         # extract user data
-        user_data = {
-            "user_id": claims.get("sub"),
-            "user_name": claims.get("given_name")
-        }
+        user_id = claims.get("sub"),
+        user_name = claims.get("given_name")
 
-        return user_data
+        return user_id, user_name
     except ExpiredSignatureError:
         raise Exception("Token has expired")
     except InvalidTokenError as e:
