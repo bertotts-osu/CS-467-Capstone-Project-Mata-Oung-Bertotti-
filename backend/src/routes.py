@@ -1,6 +1,10 @@
 from flask import request, jsonify
+from src.db.user_progress import get_user_profile, create_user_profile
+from src.verify_token import verify_token
 
 AUTH = "/auth"
+PATTERNS = "/patterns"
+USERS = "/users"
 
 
 def register_routes(app):
@@ -8,8 +12,15 @@ def register_routes(app):
     def index():
         return "Hello World!"
 
+    @app.route('/users/<user_id>', methods=['GET'])
+    def get_user(user_id):
+        user = get_user_profile(user_id)
+        if not user:
+            return create_user_profile(user_id)
+        return user, 200
+
     @app.route(AUTH + "/signup", methods=["POST"])
-    def create_user_profile():
+    def register_user():
         try:
             data = request.get_json()
             name = data["name"]
@@ -53,13 +64,17 @@ def register_routes(app):
                 }
             )
 
-            # Extract tokens from the response
+            # extract tokens from the response
             id_token = response['AuthenticationResult']['IdToken']
             refresh_token = response['AuthenticationResult']['RefreshToken']
 
-            # Return tokens in the response
+            # verify and decode the ID token to get the Cognito user ID
+            user_id, username = verify_token(id_token)
+
+            # return tokens in the response
             return {
                 "message": "Authentication successful",
+                "user_id": user_id,
                 "id_token": id_token,
                 "refresh_token": refresh_token  # !!!!need to add logic to allow refresh of token later
             }, 200
