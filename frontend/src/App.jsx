@@ -7,6 +7,8 @@ import {
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import ContactUs from "./pages/ContactUs.jsx";
+import { devMode } from "./config";
 
 export default function App() {
 
@@ -15,31 +17,40 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if the user is authenticated (e.g., check if a token exists in localStorage)
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);  // Done loading
-  }, []);
+  // Simulate login in devMode
+  if (devMode && !localStorage.getItem("authToken")) {
+    localStorage.setItem("authToken", "dev-token");
+  }
+
+  const token = localStorage.getItem("authToken");
+  if (token) {
+    setIsAuthenticated(true);
+  }
+
+  setIsLoading(false);
+}, []);
 
   // Show loading spinner or message while determining if user is authenticated
   if (isLoading) return <div>Loading...</div>;
 
   const router = createBrowserRouter([
-    /*public routes */
-    { path: "/login", element: <Login /> },
-    { path: "/signup", element: <Signup /> },
+      /* public routes */
+      { path: "/login", element: <Login /> },
+      { path: "/signup", element: <Signup /> },
+      { path: "/contact", element: <ContactUs /> }, // ✅ Added here
 
-    /*protected routes */
-    {
-      path: "/",
-      children: [
-        { path: "/", 
-          element: isAuthenticated ? <Dashboard/> : <Navigate to="/login" replace /> 
-        }
-      ],
-    },
+      /* protected routes */
+      {
+        path: "/",
+        children: [
+          {
+            path: "/dashboard",
+            element: devMode || isAuthenticated
+            ? <Dashboard />
+            : <Navigate to="/login" replace />,
+          },
+        ],
+      },
   ]);
 
   return <RouterProvider router={router} />;
