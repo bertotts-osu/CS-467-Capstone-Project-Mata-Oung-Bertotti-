@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   Box, 
   Paper, 
@@ -22,6 +22,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import Layout from '../components/Layout';
 import CodeEditor from '../components/Editor';
 import ErrorBoundary from '../components/ErrorBoundary';
+import { fetchProblem } from '../http_requests/ProblemAPIs';
 
 const Problem = () => {
   const [code, setCode] = useState('def solution(nums):\n    # Write your solution here\n    pass');
@@ -37,6 +38,8 @@ const Problem = () => {
     { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution. Can you give me a hint?' }
   ]);
   const [error, setError] = useState(null);
+  const [problem, setProblem] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const handleCodeChange = useCallback((newValue) => {
     try {
@@ -101,6 +104,23 @@ const Problem = () => {
     }
   }, []);
 
+  useEffect(() => {
+    async function loadProblem() {
+      setLoading(true);
+      setError(null);
+      try {
+        // Hardcoded for demo; replace with dynamic selection as needed
+        const response = await fetchProblem({ pattern: 'fibonacci', difficulty: 'Easy' });
+        setProblem(response.data);
+      } catch (err) {
+        setError(err.response?.data?.error || err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProblem();
+  }, []);
+
   return (
     <ErrorBoundary>
       <Box 
@@ -156,40 +176,45 @@ const Problem = () => {
               <Typography variant="h6" gutterBottom>
                 Problem Description
               </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                Implement Fibonacci Sequence
-              </Typography>
-              <Typography 
-                variant="body2" 
-                component="pre"
-                sx={{ 
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'monospace',
-                  mb: 2 
-                }}
-              >
-Write a function that returns the nth Fibonacci number.
-The Fibonacci sequence is defined as follows:
-F(0) = 0, F(1) = 1
-F(n) = F(n-1) + F(n-2), for n {'>'}= 2
-              </Typography>
-              <Typography variant="subtitle2" gutterBottom>
-                Example:
-              </Typography>
-              <Typography 
-                variant="body2" 
-                component="pre" 
-                sx={{ 
-                  fontFamily: 'monospace',
-                  bgcolor: '#f5f5f5',
-                  p: 1,
-                  borderRadius: 1
-                }}
-              >
+              {loading ? (
+                <Typography variant="body2">Loading...</Typography>
+              ) : problem ? (
+                <>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    {problem.name}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    component="pre"
+                    sx={{ 
+                      whiteSpace: 'pre-wrap',
+                      fontFamily: 'monospace',
+                      mb: 2 
+                    }}
+                  >
+                    {problem.prompt}
+                  </Typography>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Example:
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    component="pre" 
+                    sx={{ 
+                      fontFamily: 'monospace',
+                      bgcolor: '#f5f5f5',
+                      p: 1,
+                      borderRadius: 1
+                    }}
+                  >
 Input: n = 4
 Output: 3
 Explanation: F(4) = F(3) + F(2) = 2 + 1 = 3
-              </Typography>
+                  </Typography>
+                </>
+              ) : (
+                <Typography variant="body2" color="error">No problem found.</Typography>
+              )}
             </Box>
 
             {/* Test Cases Section */}
