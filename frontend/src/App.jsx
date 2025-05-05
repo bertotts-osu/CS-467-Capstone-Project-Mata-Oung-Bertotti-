@@ -8,6 +8,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
+import Problem from "./pages/Problem.jsx";
 import { devMode } from "./config";
 
 export default function App() {
@@ -37,17 +38,29 @@ export default function App() {
       /* public routes */
       { path: "/login", element: <Login /> },
       { path: "/signup", element: <Signup /> },
-      { path: "/contact", element: <ContactUs /> }, // ✅ Added here
+      { path: "/contact", element: <ContactUs /> },
 
       /* protected routes */
       {
         path: "/",
         children: [
           {
-            path: "/dashboard",
+            index: true, // This is the root path "/"
+            element: devMode || isAuthenticated 
+              ? <Navigate to="/dashboard" replace />
+              : <Navigate to="/login" replace />,
+          },
+          {
+            path: "dashboard",
             element: devMode || isAuthenticated
-            ? <Dashboard />
-            : <Navigate to="/login" replace />,
+              ? <Dashboard />
+              : <Navigate to="/login" replace />,
+          },
+          {
+            path: "problem",
+            element: devMode || isAuthenticated
+              ? <Problem />
+              : <Navigate to="/login" replace />,
           },
         ],
       },

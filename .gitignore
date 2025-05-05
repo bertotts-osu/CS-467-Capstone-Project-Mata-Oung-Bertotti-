@@ -202,3 +202,8 @@ build/
 backend/.ebextensions/python.config
 frontend/.env.development
 frontend/.env.production
+
+# Specstory
+.specstory/
+.cursorindexingignore
+.gitignore
