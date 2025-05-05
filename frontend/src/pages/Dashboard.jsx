@@ -10,7 +10,8 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    Divider
+    Divider,
+    Button
 } from "@mui/material";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
@@ -19,6 +20,7 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import Footer from "../components/Footer";
 import Layout from "../components/Layout";
 import { devMode } from "../config";
+import { useNavigate } from "react-router-dom";
 
 // Placeholder for user data - replace with real user context or props
 const user = {
@@ -93,6 +95,7 @@ ProgressBar.propTypes = {
 
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   return (
     <Layout backgroundImage="/public/dashboard_hexagon.jpg">
 
@@ -103,6 +106,17 @@ export default function Dashboard() {
         <Typography color="text.secondary">
           Your personalized algorithm journey starts here.
         </Typography>
+        <Box mt={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{ fontWeight: 600, borderRadius: 2 }}
+            onClick={() => navigate('/problem')}
+          >
+            Go to Problem Section
+          </Button>
+        </Box>
       </Box>
 
       <Box

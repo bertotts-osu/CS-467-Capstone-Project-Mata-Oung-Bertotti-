@@ -27,9 +27,9 @@ export default function Login() {
     e.preventDefault();
     try {
       const response = await login({ username, password });
-      const { message, token, refreshToken } = response.data;
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("authRefreshToken", refreshToken);
+      const { message, id_token, refresh_token } = response.data;
+      localStorage.setItem("authToken", id_token);
+      localStorage.setItem("authRefreshToken", refresh_token);
       navigate("/"); // Redirect to Dashboard
     } catch (err) {
       setError(err.response?.data?.error || err.message);
@@ -87,7 +87,7 @@ return (
       </form>
 
       <Box mt={2} textAlign="center">
-        <Link href="/signup">Don’t have an account? Sign Up</Link>
+        <Link href="/signup">Don't have an account? Sign Up</Link>
       </Box>
     </Layout>
   );

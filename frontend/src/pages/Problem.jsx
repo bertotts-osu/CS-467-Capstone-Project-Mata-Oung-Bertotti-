@@ -22,7 +22,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import Layout from '../components/Layout';
 import CodeEditor from '../components/Editor';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { fetchProblem } from '../http_requests/ProblemAPIs';
+import { executeCode, fetchProblem } from '../http_requests/ProblemAPIs';
 import ProblemDescription from '../components/ProblemDescription';
 import CodeEditorPanel from '../components/CodeEditorPanel';
 import AIAssistantPanel from '../components/AIAssistantPanel';
@@ -98,15 +98,24 @@ const Problem = () => {
     }
   }, [handleSendMessage]);
 
-  const handleRun = useCallback(() => {
+  const handleRun = useCallback(async () => {
     try {
-      setConsoleOutput('Running code...\n> Testing solution(4)\nOutput: 3\nTest passed!\n\n> Testing solution(5)\nOutput: 4\nExpected: 5\nTest failed!');
+      setConsoleOutput('Running code...');
       setConsoleTab(0);
+      const response = await executeCode({ code, language, input: '' });
+      const { output, error, success } = response.data;
+      let resultMsg = '';
+      if (success) {
+        resultMsg = `Output:\n${output}`;
+      } else {
+        resultMsg = `Error:\n${error || 'Unknown error.'}`;
+      }
+      setConsoleOutput(resultMsg);
     } catch (error) {
       console.error('Code execution error:', error);
-      setError('Failed to execute code. Please try again.');
+      setError(error.response?.data?.error || error.message || 'Failed to execute code. Please try again.');
     }
-  }, []);
+  }, [code, language]);
 
   const handleHintClick = useCallback(() => {
     setChatMessages(prev => [...prev, { role: 'user', content: 'Can I have a hint?' }]);

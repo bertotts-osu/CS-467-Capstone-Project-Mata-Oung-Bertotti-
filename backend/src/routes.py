@@ -6,6 +6,9 @@ from src.db.user_progress import get_user_profile, create_user_profile
 from src.exceptions import ProblemNotFound
 from src.verify_token import verify_token
 from functools import wraps
+import subprocess
+import tempfile
+import os
 
 AUTH = "/auth"
 PROBLEMS = "/problems"
@@ -132,6 +135,37 @@ def register_routes(app):
                 return {"error": str(e)}, 500
 
         return {"data": {"problems": created_problems}}, 201
+
+    @app.route('/execute', methods=['POST'])
+    @require_auth
+    def execute_code():
+        data = request.get_json()
+        code = data.get('code')
+        language = data.get('language', 'python')
+        input_data = data.get('input', '')
+        if not code or language != 'python':
+            return {"error": "Only Python code execution is supported in this demo."}, 400
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp:
+                temp.write(code)
+                temp_filename = temp.name
+            try:
+                result = subprocess.run(
+                    ['python', temp_filename],
+                    input=input_data.encode(),
+                    capture_output=True,
+                    timeout=5
+                )
+                output = result.stdout.decode()
+                error = result.stderr.decode()
+                success = result.returncode == 0
+            finally:
+                os.remove(temp_filename)
+            return {"output": output, "error": error, "success": success}, 200
+        except subprocess.TimeoutExpired:
+            return {"output": "", "error": "Execution timed out.", "success": False}, 200
+        except Exception as e:
+            return {"output": "", "error": str(e), "success": False}, 500
 
 
 def require_auth(route):
