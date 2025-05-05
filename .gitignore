@@ -202,3 +202,5 @@ build/
 backend/.ebextensions/python.config
 frontend/.env.development
 frontend/.env.production
+# SpecStory explanation file
+.specstory/.what-is-this.md
