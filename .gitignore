@@ -202,5 +202,9 @@ build/
 backend/.ebextensions/python.config
 frontend/.env.development
 frontend/.env.production
+# Specstory
+.specstory/
+.cursorindexingignore
+.gitignore
 # SpecStory explanation file
 .specstory/.what-is-this.md
