@@ -207,3 +207,5 @@ frontend/.env.production
 .specstory/
 .cursorindexingignore
 .gitignore
+# SpecStory explanation file
+.specstory/.what-is-this.md
