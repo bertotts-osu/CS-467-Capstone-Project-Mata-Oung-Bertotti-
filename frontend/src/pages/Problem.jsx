@@ -26,6 +26,7 @@ import { executeCode, fetchProblem } from '../http_requests/ProblemAPIs';
 import ProblemDescription from '../components/ProblemDescription';
 import CodeEditorPanel from '../components/CodeEditorPanel';
 import AIAssistantPanel from '../components/AIAssistantPanel';
+import { useLocation } from "react-router-dom";
 
 const Problem = () => {
   const [code, setCode] = useState('def solution(nums):\n    # Write your solution here\n    pass');
@@ -44,6 +45,7 @@ const Problem = () => {
   const [problem, setProblem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showHintButton, setShowHintButton] = useState(true);
+  const location = useLocation();
 
   const handleCodeChange = useCallback((newValue) => {
     try {
@@ -133,8 +135,10 @@ const Problem = () => {
       setLoading(true);
       setError(null);
       try {
-        // Hardcoded for demo; replace with dynamic selection as needed
-        const response = await fetchProblem({ pattern: 'fibonacci', difficulty: 'Easy' });
+        // Use pattern/difficulty from navigation state, fallback to defaults
+        const pattern = location.state?.pattern || 'fibonacci';
+        const difficulty = location.state?.difficulty || 'Easy';
+        const response = await fetchProblem({ pattern, difficulty });
         setProblem(response.data);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -143,7 +147,7 @@ const Problem = () => {
       }
     }
     loadProblem();
-  }, []);
+  }, [location.state]);
 
   return (
     <ErrorBoundary>
