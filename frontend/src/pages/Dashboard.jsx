@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import {
     Box,
@@ -32,37 +32,13 @@ const user = {
   },
 };
 
-// Placeholder LearningMenu component
-function LearningMenuPlaceholder() {
-  return (
-    <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        <MenuBookIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-        Learning Menu
-      </Typography>
-      <List dense>
-        <ListItem>
-          <ListItemIcon>
-            <AutoGraphIcon color="primary" />
-          </ListItemIcon>
-          <ListItemText primary="Recursion" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <AutoGraphIcon color="secondary" />
-          </ListItemIcon>
-          <ListItemText primary="Sliding Window" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <AutoGraphIcon color="success" />
-          </ListItemIcon>
-          <ListItemText primary="Two Pointers" />
-        </ListItem>
-      </List>
-    </Paper>
-  );
-}
+// Use a static array of patterns that match the backend
+const PATTERNS = [
+  { name: "Binary Search", color: "primary" },
+  { name: "Divide and Conquer", color: "secondary" },
+  { name: "Greedy Algorithm", color: "success" },
+  { name: "Sliding Window", color: "primary" }
+];
 
 function ProgressBar({ label, percent, icon }) {
   return (
@@ -93,9 +69,9 @@ ProgressBar.propTypes = {
   icon: PropTypes.element,
 };
 
-
 export default function Dashboard() {
   const navigate = useNavigate();
+
   return (
     <Layout backgroundImage="/public/dashboard_hexagon.jpg">
 
@@ -106,17 +82,6 @@ export default function Dashboard() {
         <Typography color="text.secondary">
           Your personalized algorithm journey starts here.
         </Typography>
-        <Box mt={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            sx={{ fontWeight: 600, borderRadius: 2 }}
-            onClick={() => navigate('/problem')}
-          >
-            Go to Problem Section
-          </Button>
-        </Box>
       </Box>
 
       <Box
@@ -156,5 +121,31 @@ export default function Dashboard() {
         <ProgressBar label="Two Pointers" percent={60} icon={<StarIcon sx={{ color: "#43a047" }} />} />
       </Paper>
     </Layout>
+  );
+}
+
+function LearningMenuPlaceholder() {
+  const navigate = useNavigate();
+  return (
+    <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        <MenuBookIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+        Learning Menu
+      </Typography>
+      <List dense>
+        {PATTERNS.map((pattern) => (
+          <ListItem
+            button
+            key={pattern.name}
+            onClick={() => navigate('/problem', { state: { pattern: pattern.name, difficulty: "Easy" } })}
+          >
+            <ListItemIcon>
+              <AutoGraphIcon color={pattern.color} />
+            </ListItemIcon>
+            <ListItemText primary={pattern.name} />
+          </ListItem>
+        ))}
+      </List>
+    </Paper>
   );
 }
