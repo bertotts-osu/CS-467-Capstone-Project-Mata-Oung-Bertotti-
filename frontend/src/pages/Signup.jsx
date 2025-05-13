@@ -83,7 +83,7 @@ export default function Signup() {
   };
 
   return (
-    <Layout backgroundImage="/public/signup_lines.jpg">
+    <Layout backgroundImage="/signup_lines.jpg">
 
       <Typography variant="h4" gutterBottom>
         Sign Up

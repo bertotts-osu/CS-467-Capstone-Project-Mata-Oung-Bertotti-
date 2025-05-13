@@ -73,7 +73,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   return (
-    <Layout backgroundImage="/public/dashboard_hexagon.jpg">
+    <Layout backgroundImage="/dashboard_hexagon.jpg">
 
       <Box textAlign="center" mb={4}>
         <Typography variant="h4" fontWeight={700} mb={1}>

@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import Problem from "./pages/Problem.jsx";
 import { devMode } from "./config";
+import ChatTest from './pages/ChatTest';
 
 export default function App() {
 
@@ -39,6 +40,12 @@ export default function App() {
       { path: "/login", element: <Login /> },
       { path: "/signup", element: <Signup /> },
       { path: "/contact", element: <ContactUs /> },
+
+
+      { path: "/chat-test", element: <ChatTest /> },
+
+      /* temp dev/test route */
+      { path: "/chat-test", element: <ChatTest /> },
 
       /* protected routes */
       {
