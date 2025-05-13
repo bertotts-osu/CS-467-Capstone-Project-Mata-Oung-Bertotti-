@@ -14,11 +14,15 @@ import {
   Tab,
   Divider,
   Alert,
-  Snackbar
+  Snackbar,
+  Modal,
+  Fab,
+  Tooltip
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import CloseIcon from '@mui/icons-material/Close';
 import Layout from '../components/Layout';
 import CodeEditor from '../components/Editor';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -27,6 +31,7 @@ import ProblemDescription from '../components/ProblemDescription';
 import CodeEditorPanel from '../components/CodeEditorPanel';
 import AIAssistantPanel from '../components/AIAssistantPanel';
 import { useLocation } from "react-router-dom";
+import FeedbackIcon from '@mui/icons-material/Feedback';
 
 const Problem = () => {
   const [code, setCode] = useState('def solution(nums):\n    # Write your solution here\n    pass');
@@ -46,6 +51,7 @@ const Problem = () => {
   const [loading, setLoading] = useState(true);
   const [showHintButton, setShowHintButton] = useState(true);
   const location = useLocation();
+  const [openAIModal, setOpenAIModal] = useState(false);
 
   const handleCodeChange = useCallback((newValue) => {
     try {
@@ -212,8 +218,61 @@ const Problem = () => {
             onSendMessage={handleSendMessage}
             showHintButton={showHintButton}
             onHintClick={handleHintClick}
+            sx={{
+              boxShadow: 6,
+              borderRadius: 2,
+              p: 0,
+              m: 2,
+              bgcolor: 'white',
+              minWidth: 340,
+              maxWidth: 400,
+              display: 'flex',
+              flexDirection: 'column',
+              height: 'calc(100% - 32px)'
+            }}
+            header={{
+              icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
+              title: 'AI Help & Feedback'
+            }}
           />
         </Box>
+
+        <Modal open={openAIModal} onClose={() => setOpenAIModal(false)}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 400,
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              borderRadius: 2,
+              p: 2,
+              outline: 'none',
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '80vh',
+              minWidth: { xs: '90vw', sm: 400 },
+              minHeight: 400
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <IconButton onClick={() => setOpenAIModal(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <AIAssistantPanel
+              chatMessages={chatMessages}
+              message={message}
+              onMessageChange={handleMessageChange}
+              onKeyPress={handleKeyPress}
+              onSendMessage={handleSendMessage}
+              showHintButton={showHintButton}
+              onHintClick={handleHintClick}
+            />
+          </Box>
+        </Modal>
       </Box>
     </ErrorBoundary>
   );
