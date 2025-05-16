@@ -31,6 +31,8 @@ import ProblemDescription from '../components/ProblemDescription';
 import CodeEditorPanel from '../components/CodeEditorPanel';
 import AIAssistantPanel from '../components/AIAssistantPanel';
 import { useLocation } from "react-router-dom";
+import { devMode } from "../config";
+import { sendMessageToGPT } from '../http_requests/ChatGptAPI';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 
 const Problem = () => {
@@ -81,23 +83,46 @@ const Problem = () => {
     setMessage(event.target.value);
   };
 
-  const handleSendMessage = useCallback(() => {
-    if (message.trim()) {
+  const sendMessageToGPT = async (messages) => {
       try {
-        setChatMessages(prev => [...prev, { role: 'user', content: message }]);
-        setMessage('');
-        setTimeout(() => {
-          setChatMessages(prev => [...prev, { 
-            role: 'assistant', 
-            content: 'I\'m analyzing your code to provide better assistance...'
-          }]);
-        }, 1000);
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ messages }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get AI response.');
+        }
+
+        const data = await response.json();
+        return data.reply;
       } catch (error) {
-        console.error('Chat message error:', error);
-        setError('Failed to send message. Please try again.');
+        console.error('Error communicating with GPT API:', error);
+        return 'Sorry, there was an error trying to help with your solution.';
       }
+  };
+
+  const handleSendMessage = useCallback(async () => {
+  if (message.trim()) {
+    try {
+      const newUserMessage = { role: 'user', content: message };
+      const updatedMessages = [...chatMessages, newUserMessage];
+
+      setChatMessages(updatedMessages);
+      setMessage('');
+
+      const assistantReply = await sendMessageToGPT(updatedMessages);
+
+      setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      setError('Failed to send message. Please try again.');
     }
-  }, [message]);
+  }
+}, [message, chatMessages]);
 
   const handleKeyPress = useCallback((event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -157,8 +182,8 @@ const Problem = () => {
 
   return (
     <ErrorBoundary>
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           width: '100vw',
           height: '100vh',
           bgcolor: '#1e1e1e',
@@ -169,6 +194,21 @@ const Problem = () => {
         {/* Navbar placeholder - height matches Layout's navbar */}
         <Box sx={{ height: '64px', bgcolor: 'primary.main' }} />
 
+        {/* Dev Mode Banner */}
+        {devMode && (
+          <Box
+            p={1}
+            bgcolor="warning.main"
+            color="white"
+            textAlign="center"
+            fontWeight={500}
+          >
+            <Typography variant="body2">
+              ⚠️ Dev Mode is ON — Auth is currently bypassed for testing
+            </Typography>
+          </Box>
+        )}
+
         {/* Error Snackbar */}
         <Snackbar
           open={!!error}
@@ -176,8 +216,8 @@ const Problem = () => {
           onClose={() => setError(null)}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          <Alert 
-            onClose={() => setError(null)} 
+          <Alert
+            onClose={() => setError(null)}
             severity="error"
             sx={{ width: '100%' }}
           >
@@ -186,8 +226,8 @@ const Problem = () => {
         </Snackbar>
 
         {/* Main content area */}
-        <Box 
-          sx={{ 
+        <Box
+          sx={{
             flex: 1,
             display: 'flex',
             overflow: 'hidden'
@@ -278,4 +318,4 @@ const Problem = () => {
   );
 };
 
-export default Problem; 
+export default Problem;
