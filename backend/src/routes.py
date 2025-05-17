@@ -13,6 +13,7 @@ import os
 AUTH = "/auth"
 PROBLEMS = "/problems"
 USERS = "/users"
+ATTEMPTS = "/attempts"
 
 
 def register_routes(app):
@@ -135,6 +136,15 @@ def register_routes(app):
                 return {"error": str(e)}, 500
 
         return {"data": {"problems": created_problems}}, 201
+
+    @app.route(ATTEMPTS, methods=["POST"])
+    @require_auth
+    def process_problem_attempt():
+        attempt = request.get_json()
+        result = evaluate_code(attempt)
+        add_record_of_attempt(attempt, result)
+        return result, 200
+
 
     @app.route('/execute', methods=['POST'])
     @require_auth
