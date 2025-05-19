@@ -177,6 +177,32 @@ def register_routes(app):
         except Exception as e:
             return {"output": "", "error": str(e), "success": False}, 500
 
+    @app.route('/api/chat', methods=['POST'])
+    def chat_with_gpt():
+        try:
+            from openai import AzureOpenAI
+            import os
+
+            messages = request.get_json().get("messages", [])
+
+            client = AzureOpenAI(
+                api_key=os.getenv("AZURE_OPENAI_KEY"),
+                api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+            )
+
+            response = client.chat.completions.create(
+                model=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+                messages=messages,
+                temperature=0.7
+            )
+
+            reply = response.choices[0].message.content
+            return {"reply": reply}, 200
+
+        except Exception as e:
+            print("GPT API error:", str(e))
+            return {"error": "GPT API failed", "details": str(e)}, 500
 
 def require_auth(route):
     @wraps(route)

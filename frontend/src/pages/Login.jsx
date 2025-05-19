@@ -37,7 +37,7 @@ export default function Login() {
   };
 
 return (
-    <Layout backgroundImage="/public/login_abstract.jpg">
+    <Layout backgroundImage="/login_abstract.jpg">
 
       <Typography variant="h4" gutterBottom>
         Login
