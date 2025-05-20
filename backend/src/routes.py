@@ -1,7 +1,10 @@
-from flask import request
+from flask import request, g
 from marshmallow import ValidationError
+
+from src.chatgpt.curated_tasks import modify_problem
 from src.db.problems import get_problem, add_problem
 from src.db.schemas import ProblemSchema
+from src.db.user_attemtps import add_or_update_user_attempt
 from src.db.user_progress import get_user_profile, create_user_profile
 from src.exceptions import ProblemNotFound
 from src.verify_token import verify_token
@@ -17,9 +20,6 @@ ATTEMPTS = "/attempts"
 
 
 def register_routes(app):
-    @app.route("/")
-    def index():
-        return "Hello World!"
 
     @app.route('/users/<user_id>', methods=['GET'])
     def get_user(user_id):
@@ -27,6 +27,23 @@ def register_routes(app):
         if not user:
             return create_user_profile(user_id)
         return user, 200
+
+    # @app.route(PROBLEMS, methods=["GET"])
+    # @require_auth
+    # def fetch_problem():
+    #     pattern = request.args.get('pattern')
+    #     difficulty = request.args.get('difficulty')
+    #
+    #     if not pattern or not difficulty:
+    #         return {"error": "Missing query parameter."}, 400
+    #     try:
+    #         problem = get_problem(pattern, difficulty)
+    #         modified_problem = modify_problem(problem, app.openai_client)
+    #         return modified_problem, 200
+    #     except ProblemNotFound as e:
+    #         return {"error": str(e)}, 404
+    #     except Exception as e:
+    #         return {"error": str(e)}, 500
 
     @app.route(PROBLEMS, methods=["GET"])
     @require_auth
@@ -36,9 +53,29 @@ def register_routes(app):
 
         if not pattern or not difficulty:
             return {"error": "Missing query parameter."}, 400
+
         try:
+            user_id = g.user_id
             problem = get_problem(pattern, difficulty)
-            return problem, 200
+            modified_prompt = modify_problem(problem, app.openai_client)
+            attempt_data = {
+                "user_id": user_id,
+                "pattern": pattern,
+                "difficulty": difficulty,
+                "index": problem["index"],
+                "modified_prompt": modified_prompt["prompt"],
+                "passed": False,
+                "number_of_attempts": 1,
+            }
+            formatted_attempt = add_or_update_user_attempt(attempt_data)
+
+            return {
+                "name": modified_prompt["name"],
+                "prompt": modified_prompt["prompt"],
+                "example": modified_prompt["example"],
+                "attempt_id": formatted_attempt["attempt_id"]
+            }, 200
+
         except ProblemNotFound as e:
             return {"error": str(e)}, 404
         except Exception as e:
@@ -140,11 +177,11 @@ def register_routes(app):
     @app.route(ATTEMPTS, methods=["POST"])
     @require_auth
     def process_problem_attempt():
-        attempt = request.get_json()
-        result = evaluate_code(attempt)
-        add_record_of_attempt(attempt, result)
-        return result, 200
+        body = request.get_json()
 
+        # result = evaluate_code(attempt)
+        # add_record_of_attempt(attempt, result)
+        return result, 200
 
     @app.route('/execute', methods=['POST'])
     @require_auth
@@ -204,6 +241,7 @@ def register_routes(app):
             print("GPT API error:", str(e))
             return {"error": "GPT API failed", "details": str(e)}, 500
 
+
 def require_auth(route):
     @wraps(route)
     def decorated(*args, **kwargs):
@@ -214,10 +252,11 @@ def require_auth(route):
         token = auth_header.split(" ")[1]
         try:
             user_id, user_name = verify_token(token)
-            request.user_id = user_id
-            request.user_name = user_name
+            g.user_id = user_id[0]
+            g.user_name = user_name
         except Exception as e:
             return {"error": "Invalid Token", "error_data": str(e)}, 403
 
         return route(*args, **kwargs)
+
     return decorated

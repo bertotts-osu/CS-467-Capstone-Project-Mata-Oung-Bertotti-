@@ -1,4 +1,3 @@
-
 # JSON Payload from Backend to GPT 4-o structure:
 """
 
@@ -22,6 +21,7 @@ def build_gpt_prompt(data):
     return f"{instruction_prompt}\n\n---\n\n{user_interaction}"
 
 """
+
 
 # Instructions
 
@@ -69,10 +69,3 @@ def user_instructions(settings):
         messages.append(settings["user_request"])
 
     return "\n\n".join(messages)
-
-
-
-
-
-
-
