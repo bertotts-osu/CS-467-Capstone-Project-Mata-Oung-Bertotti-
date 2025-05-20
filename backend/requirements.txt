@@ -6,3 +6,4 @@ requests~=2.32.3
 PyJWT~=2.10.1
 pynamodb~=6.0.2
 marshmallow~=4.0.0
+openai~=1.79.0

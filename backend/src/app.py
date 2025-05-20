@@ -3,6 +3,8 @@ import boto3
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
+
+from src.chatgpt.api_utils import AzureOpenAIClient
 from src.config import DevConfig
 from src.routes import register_routes
 
@@ -35,6 +37,14 @@ def start_app(config_class=DevConfig):
         region_name=app.config["COGNITO_REGION"],
         aws_access_key_id=app.config["COGNITO_ACCESS_KEY"],
         aws_secret_access_key=app.config["COGNITO_SECRET_ACCESS_KEY"]
+    )
+
+    # initialize the OpenAI Azure client and tie it to the app
+    app.openai_client = AzureOpenAIClient(
+        endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+        api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+        api_key=os.getenv("AZURE_OPENAI_KEY")
     )
 
     # initialize routes
