@@ -25,6 +25,13 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // Clear previous errors
+
+    if (!username || !password) {
+      setError("Username and password are required.");
+      return;
+    }
+
     try {
       const response = await login({ username, password });
       const { message, id_token, refresh_token } = response.data;
@@ -36,9 +43,8 @@ export default function Login() {
     }
   };
 
-return (
+  return (
     <Layout backgroundImage="/login_abstract.jpg">
-
       <Typography variant="h4" gutterBottom>
         Login
       </Typography>
@@ -50,6 +56,7 @@ return (
           margin="normal"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
         />
         <TextField
           label="Password"
@@ -58,6 +65,7 @@ return (
           margin="normal"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">

@@ -113,8 +113,11 @@ def register_routes(app):
     def login_user():
         try:
             data = request.get_json()
-            username = data["username"]
-            password = data["password"]
+            username = data.get("username")
+            password = data.get("password")
+
+            if not username or not password:
+                return {"error": "Username and password are required."}, 400
 
             response = app.cognito_client.initiate_auth(
                 ClientId=app.config["COGNITO_APP_CLIENT_ID"],

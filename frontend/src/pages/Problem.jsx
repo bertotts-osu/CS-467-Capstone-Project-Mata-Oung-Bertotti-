@@ -101,20 +101,23 @@ const Problem = () => {
   };
 
   const handleSendMessage = useCallback(async () => {
-    if (message.trim()) {
-      const newUserMessage = { role: 'user', content: message };
-      setChatMessages(prev => [...prev, newUserMessage]);
-      setMessage('');
-
-      const assistantReply = await sendMessageToGPT({
-        user_request: message,
-        submission: "no",
-        hint: "no",
-      });
-
-      setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+    if (!message.trim()) {
+      setError("Please enter a message.");
+      return;
     }
-  }, [message, code]);
+    const newUserMessage = { role: 'user', content: message };
+    const updatedMessages = [...chatMessages, newUserMessage];
+    setChatMessages(updatedMessages);
+    setMessage('');
+
+    const assistantReply = await sendMessageToGPT({
+      messages: updatedMessages,
+      problem: problem?.prompt || '',
+      code: code || '',
+    });
+
+    setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+  }, [message, chatMessages, problem, code]);
 
   const handleKeyPress = useCallback((event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
