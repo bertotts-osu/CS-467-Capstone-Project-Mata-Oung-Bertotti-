@@ -1,10 +1,10 @@
 import axios from "axios";
 
-export async function sendMessageToGPT(messages) {
+export async function sendMessageToGPT(payload) {
   try {
     const response = await axios.post(
       `${import.meta.env.VITE_SERVER_URL}/api/chat`,
-      { messages },
+      payload,
       {
         headers: {
           "Content-Type": "application/json"
