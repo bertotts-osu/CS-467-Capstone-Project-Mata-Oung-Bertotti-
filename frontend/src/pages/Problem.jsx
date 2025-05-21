@@ -34,6 +34,7 @@ import { useLocation } from "react-router-dom";
 import { devMode } from "../config";
 import { sendMessageToGPT } from '../http_requests/ChatGptAPI';
 import FeedbackIcon from '@mui/icons-material/Feedback';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 const Problem = () => {
   const [code, setCode] = useState('def solution(nums):\n    # Write your solution here\n    pass');
@@ -54,6 +55,7 @@ const Problem = () => {
   const [showHintButton, setShowHintButton] = useState(true);
   const location = useLocation();
   const [openAIModal, setOpenAIModal] = useState(false);
+  const [aiPanelOpen, setAIPanelOpen] = useState(false);
 
   const handleCodeChange = useCallback((newValue) => {
     try {
@@ -151,6 +153,7 @@ const Problem = () => {
   }, [code, language]);
 
   const handleHintClick = useCallback(() => {
+    setAIPanelOpen(true);
     setChatMessages(prev => [...prev, { role: 'user', content: 'Can I have a hint?' }]);
     setShowHintButton(false);
     setTimeout(() => {
@@ -161,14 +164,32 @@ const Problem = () => {
     }, 1000);
   }, []);
 
+  const handleSubmit = useCallback(async () => {
+    try {
+      setConsoleOutput('Submitting code...');
+      setConsoleTab(0);
+      const response = await executeCode({ code, language, input: '' });
+      const { output, error, success } = response.data;
+      let resultMsg = '';
+      if (success) {
+        resultMsg = `Output:\n${output}`;
+      } else {
+        resultMsg = `Error:\n${error || 'Unknown error.'}`;
+      }
+      setConsoleOutput(resultMsg);
+    } catch (error) {
+      setConsoleOutput('Error submitting code.');
+    }
+  }, [code, language]);
+
   useEffect(() => {
     async function loadProblem() {
       setLoading(true);
       setError(null);
       try {
-        // Use pattern/difficulty from navigation state, fallback to defaults
-        const pattern = location.state?.pattern || 'fibonacci';
-        const difficulty = location.state?.difficulty || 'Easy';
+        // Set default pattern and difficulty to Sliding Window and Medium
+        const pattern = location.state?.pattern || 'Sliding Window';
+        const difficulty = location.state?.difficulty || 'Medium';
         const response = await fetchProblem({ pattern, difficulty });
         setProblem(response.data);
       } catch (err) {
@@ -230,51 +251,79 @@ const Problem = () => {
           sx={{
             flex: 1,
             display: 'flex',
-            overflow: 'hidden'
+            flexDirection: 'row',
+            overflow: 'hidden',
+            justifyContent: aiPanelOpen ? 'flex-start' : 'center',
+            alignItems: aiPanelOpen ? 'stretch' : 'center',
+            minHeight: 0,
+            transition: 'all 0.3s',
           }}
         >
-          {/* Problem Description - Left Side */}
-          <ProblemDescription problem={problem} loading={loading} />
-
-          {/* Code Editor Section - Middle */}
-          <CodeEditorPanel
-            code={code}
-            onCodeChange={handleCodeChange}
-            language={language}
-            onLanguageChange={handleLanguageChange}
-            onRun={handleRun}
-            onSubmit={() => {}}
-            consoleTab={consoleTab}
-            onConsoleTabChange={handleConsoleTabChange}
-            consoleOutput={consoleOutput}
-          />
-
-          {/* AI Assistant - Right Side */}
-          <AIAssistantPanel
-            chatMessages={chatMessages}
-            message={message}
-            onMessageChange={handleMessageChange}
-            onKeyPress={handleKeyPress}
-            onSendMessage={handleSendMessage}
-            showHintButton={showHintButton}
-            onHintClick={handleHintClick}
+          <Box
             sx={{
-              boxShadow: 6,
-              borderRadius: 2,
-              p: 0,
-              m: 2,
-              bgcolor: 'white',
-              minWidth: 340,
-              maxWidth: 400,
               display: 'flex',
-              flexDirection: 'column',
-              height: 'calc(100% - 32px)'
+              flexDirection: 'row',
+              gap: 0,
+              width: '100%',
+              height: '100%',
+              alignItems: 'stretch',
+              justifyContent: 'flex-start',
+              transition: 'all 0.3s',
             }}
-            header={{
-              icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
-              title: 'AI Help & Feedback'
-            }}
-          />
+          >
+            {/* Problem Description - Left Side */}
+            <Box sx={{ width: '50%', minWidth: 0, height: '100%' }}>
+              <ProblemDescription problem={problem} loading={loading} />
+            </Box>
+
+            {/* Code Editor Section - Middle */}
+            <Box sx={{ width: '50%', minWidth: 0, height: '100%' }}>
+              <CodeEditorPanel
+                code={code}
+                onCodeChange={handleCodeChange}
+                language={language}
+                onLanguageChange={handleLanguageChange}
+                onSubmit={handleSubmit}
+                consoleTab={consoleTab}
+                onConsoleTabChange={handleConsoleTabChange}
+                consoleOutput={consoleOutput}
+                setAIPanelOpen={setAIPanelOpen}
+              />
+            </Box>
+          </Box>
+
+          {/* AI Assistant - Right Side, only show if open */}
+          {aiPanelOpen && (
+            <AIAssistantPanel
+              chatMessages={chatMessages}
+              message={message}
+              onMessageChange={handleMessageChange}
+              onKeyPress={handleKeyPress}
+              onSendMessage={handleSendMessage}
+              showHintButton={showHintButton}
+              onHintClick={handleHintClick}
+              sx={{
+                boxShadow: 6,
+                borderRadius: 2,
+                p: 0,
+                m: 2,
+                bgcolor: 'white',
+                minWidth: 340,
+                maxWidth: 400,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 'calc(100% - 32px)'
+              }}
+              header={{
+                icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
+                title: 'AI Help & Feedback',
+                onClose: () => setAIPanelOpen(false),
+                onClearChat: () => setChatMessages([
+                  { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution.' }
+                ])
+              }}
+            />
+          )}
         </Box>
 
         <Modal open={openAIModal} onClose={() => setOpenAIModal(false)}>

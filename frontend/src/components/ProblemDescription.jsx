@@ -6,7 +6,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 const ProblemDescription = ({ problem, loading, testCases }) => (
   <Paper
     sx={{
-      width: "25%",
+      width: "100%",
       height: "100%",
       bgcolor: "white",
       borderRadius: 0,
