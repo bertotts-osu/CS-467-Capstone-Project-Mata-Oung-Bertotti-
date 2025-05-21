@@ -39,6 +39,21 @@ import FeedbackIcon from '@mui/icons-material/Feedback';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Navbar from '../components/Navbar';
 
+const getDefaultValue = (lang) => {
+  switch (lang.toLowerCase()) {
+    case 'python':
+      return 'def solution(nums):\n    # Write your solution here\n    pass';
+    case 'javascript':
+      return 'function solution(nums) {\n    // Write your solution here\n}';
+    case 'java':
+      return 'public class Solution {\n    public int solution(int nums) {\n        // Write your solution here\n        return 0;\n    }\n}';
+    case 'cpp':
+      return '#include <vector>\n\nclass Solution {\npublic:\n    int solution(int nums) {\n        // Write your solution here\n        return 0;\n    }\n};';
+    default:
+      return '// Error loading language template';
+  }
+};
+
 const Problem = () => {
   const [code, setCode] = useState('def solution(nums):\n    # Write your solution here\n    pass');
   const [message, setMessage] = useState('');
@@ -60,6 +75,7 @@ const Problem = () => {
   const [openAIModal, setOpenAIModal] = useState(false);
   const [aiPanelOpen, setAIPanelOpen] = useState(false);
   const navigate = useNavigate();
+  const [passFailStatus, setPassFailStatus] = useState(null);
 
   const handleCodeChange = useCallback((newValue) => {
     try {
@@ -177,14 +193,23 @@ const Problem = () => {
       let resultMsg = '';
       if (success) {
         resultMsg = `Output:\n${output}`;
+        setPassFailStatus('pass');
       } else {
         resultMsg = `Error:\n${error || 'Unknown error.'}`;
+        setPassFailStatus('fail');
       }
       setConsoleOutput(resultMsg);
     } catch (error) {
       setConsoleOutput('Error submitting code.');
+      setPassFailStatus('fail');
     }
   }, [code, language]);
+
+  const handleRetry = useCallback(() => {
+    setCode(getDefaultValue(language));
+    setConsoleOutput('');
+    setPassFailStatus(null);
+  }, [language]);
 
   useEffect(() => {
     async function loadProblem() {
@@ -284,6 +309,8 @@ const Problem = () => {
               onConsoleTabChange={handleConsoleTabChange}
               consoleOutput={consoleOutput}
               setAIPanelOpen={setAIPanelOpen}
+              passFailStatus={passFailStatus}
+              onRetry={handleRetry}
             />
           </Box>
 
