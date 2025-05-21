@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from src.app import start_app
 from src.config import DevConfig
 

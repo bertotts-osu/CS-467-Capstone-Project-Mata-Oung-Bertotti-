@@ -59,10 +59,6 @@ const Problem = () => {
   const [message, setMessage] = useState('');
   const [language, setLanguage] = useState('python');
   const [consoleTab, setConsoleTab] = useState(0);
-  const [testCases] = useState([
-    { input: 'n = 4', output: '3', passed: true },
-    { input: 'n = 5', output: '5', passed: false },
-  ]);
   const [consoleOutput, setConsoleOutput] = useState('');
   const [chatMessages, setChatMessages] = useState([
     { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution.' }
@@ -89,7 +85,6 @@ const Problem = () => {
   const handleLanguageChange = useCallback((event) => {
     try {
       setLanguage(event.target.value);
-      // Reset console output when language changes
       setConsoleOutput('');
     } catch (error) {
       console.error('Language change error:', error);
@@ -107,27 +102,19 @@ const Problem = () => {
 
   const handleSendMessage = useCallback(async () => {
     if (message.trim()) {
-      try {
-        const newUserMessage = { role: 'user', content: message };
-        const updatedMessages = [...chatMessages, newUserMessage];
+      const newUserMessage = { role: 'user', content: message };
+      setChatMessages(prev => [...prev, newUserMessage]);
+      setMessage('');
 
-        setChatMessages(updatedMessages);
-        setMessage('');
+      const assistantReply = await sendMessageToGPT({
+        user_request: message,
+        submission: "no",
+        hint: "no",
+      });
 
-        // Always send the current problem prompt as context
-        const assistantReply = await sendMessageToGPT({
-          messages: updatedMessages,
-          problem: problem?.prompt || '', // always use the current problem prompt
-          code: code || '',
-        });
-
-        setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
-      } catch (error) {
-        console.error('Chat error:', error);
-        setError('Failed to send message. Please try again.');
-      }
+      setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
     }
-  }, [message, chatMessages, problem, code]);
+  }, [message, code]);
 
   const handleKeyPress = useCallback((event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -155,17 +142,19 @@ const Problem = () => {
     }
   }, [code, language]);
 
-  const handleHintClick = useCallback(() => {
-    setAIPanelOpen(true);
-    setChatMessages(prev => [...prev, { role: 'user', content: 'Can I have a hint?' }]);
+  const handleHintClick = useCallback(async () => {
+    const hintRequest = 'Can I have a hint?';
+    setChatMessages(prev => [...prev, { role: 'user', content: hintRequest }]);
     setShowHintButton(false);
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'I\'m analyzing your code to provide better assistance...'
-      }]);
-    }, 1000);
-  }, []);
+
+    const assistantReply = await sendMessageToGPT({
+      user_request: hintRequest,
+      submission: "no",
+      hint: "yes",
+    });
+
+    setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+  }, [code]);
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -199,7 +188,6 @@ const Problem = () => {
       setLoading(true);
       setError(null);
       try {
-        // Set default pattern and difficulty to Sliding Window and Medium
         const pattern = location.state?.pattern || 'Sliding Window';
         const difficulty = location.state?.difficulty || 'Medium';
         const response = await fetchProblem({ pattern, difficulty });
@@ -305,6 +293,20 @@ const Problem = () => {
               onMessageChange={handleMessageChange}
               onKeyPress={handleKeyPress}
               onSendMessage={handleSendMessage}
+              showHintButton={showHintButton}
+              onHintClick={handleHintClick}
+              sx={{
+                boxShadow: 6,
+                borderRadius: 2,
+                p: 0,
+                m: 2,
+                bgcolor: 'white',
+                minWidth: 340,
+                maxWidth: 400,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 'calc(100% - 32px)'
+              }}
               header={{
                 icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
                 title: 'AI Help & Feedback',

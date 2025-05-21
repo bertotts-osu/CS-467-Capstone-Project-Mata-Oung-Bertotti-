@@ -1,6 +1,5 @@
 from flask import request, g
 from marshmallow import ValidationError
-
 from src.chatgpt.curated_tasks import modify_problem
 from src.db.problems import get_problem, add_problem
 from src.db.schemas import ProblemSchema
@@ -12,12 +11,12 @@ from functools import wraps
 import subprocess
 import tempfile
 import os
+from .chatgpt.api import chatgpt_bp
 
 AUTH = "/auth"
 PROBLEMS = "/problems"
 USERS = "/users"
 ATTEMPTS = "/attempts"
-
 
 def register_routes(app):
 
@@ -281,6 +280,7 @@ def register_routes(app):
             print("GPT API error:", str(e))
             return {"error": "GPT API failed", "details": str(e)}, 500
 
+    app.register_blueprint(chatgpt_bp)
 
 def require_auth(route):
     @wraps(route)
