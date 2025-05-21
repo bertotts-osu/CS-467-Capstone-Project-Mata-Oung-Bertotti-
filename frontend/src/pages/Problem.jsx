@@ -234,7 +234,7 @@ const Problem = () => {
           }}
         >
           {/* Problem Description - Left Side */}
-          <ProblemDescription problem={problem} loading={loading} testCases={testCases} />
+          <ProblemDescription problem={problem} loading={loading} />
 
           {/* Code Editor Section - Middle */}
           <CodeEditorPanel

@@ -66,39 +66,6 @@ const ProblemDescription = ({ problem, loading, testCases }) => (
         </Typography>
       )}
     </Box>
-    {/* Test Cases Section */}
-    <Box sx={{ p: 2, borderTop: "1px solid #eee" }}>
-      <Typography variant="h6" gutterBottom>
-        Test Cases
-      </Typography>
-      {testCases.map((test, index) => (
-        <Box
-          key={index}
-          sx={{
-            mb: 2,
-            p: 1.5,
-            bgcolor: "#f8f9fa",
-            borderRadius: 1,
-            border: "1px solid #eee",
-          }}
-        >
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <Typography variant="subtitle2">Test Case {index + 1}</Typography>
-            {test.passed ? (
-              <CheckCircleIcon color="success" fontSize="small" />
-            ) : (
-              <ErrorIcon color="error" fontSize="small" />
-            )}
-          </Box>
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            Input: {test.input}
-          </Typography>
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            Output: {test.output}
-          </Typography>
-        </Box>
-      ))}
-    </Box>
   </Paper>
 );
 
