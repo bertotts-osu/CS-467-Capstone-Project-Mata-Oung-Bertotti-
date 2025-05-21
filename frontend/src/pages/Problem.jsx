@@ -39,15 +39,26 @@ import FeedbackIcon from '@mui/icons-material/Feedback';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Navbar from '../components/Navbar';
 
+const getDefaultValue = (lang) => {
+  switch (lang.toLowerCase()) {
+    case 'python':
+      return 'def solution(nums):\n    # Write your solution here\n    pass';
+    case 'javascript':
+      return 'function solution(nums) {\n    // Write your solution here\n}';
+    case 'java':
+      return 'public class Solution {\n    public int solution(int nums) {\n        // Write your solution here\n        return 0;\n    }\n}';
+    case 'cpp':
+      return '#include <vector>\n\nclass Solution {\npublic:\n    int solution(int nums) {\n        // Write your solution here\n        return 0;\n    }\n};';
+    default:
+      return '// Error loading language template';
+  }
+};
+
 const Problem = () => {
   const [code, setCode] = useState('def solution(nums):\n    # Write your solution here\n    pass');
   const [message, setMessage] = useState('');
   const [language, setLanguage] = useState('python');
   const [consoleTab, setConsoleTab] = useState(0);
-  const [testCases] = useState([
-    { input: 'n = 4', output: '3', passed: true },
-    { input: 'n = 5', output: '5', passed: false },
-  ]);
   const [consoleOutput, setConsoleOutput] = useState('');
   const [chatMessages, setChatMessages] = useState([
     { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution.' }
@@ -60,6 +71,7 @@ const Problem = () => {
   const [openAIModal, setOpenAIModal] = useState(false);
   const [aiPanelOpen, setAIPanelOpen] = useState(false);
   const navigate = useNavigate();
+  const [passFailStatus, setPassFailStatus] = useState(null);
 
   const handleCodeChange = useCallback((newValue) => {
     try {
@@ -73,7 +85,6 @@ const Problem = () => {
   const handleLanguageChange = useCallback((event) => {
     try {
       setLanguage(event.target.value);
-      // Reset console output when language changes
       setConsoleOutput('');
     } catch (error) {
       console.error('Language change error:', error);
@@ -89,53 +100,21 @@ const Problem = () => {
     setMessage(event.target.value);
   };
 
-  const sendMessageToGPT = async ({ user_request, submission = "no", hint = "no" }) => {
-  try {
-    const payload = {
-      problem_type: location.state?.pattern || 'fibonacci',
-      difficulty: location.state?.difficulty || 'Easy',
-      user_request,
-      submission,
-      hint,
-      code,  // This comes from the editor
-    };
-
-    const response = await fetch('http://localhost:5000/api/problem-chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to get AI response.');
-    }
-
-    const data = await response.json();
-    return data.response;
-
-  } catch (error) {
-    console.error('Error communicating with GPT API:', error);
-    return 'Sorry, there was an error trying to help with your solution.';
-  }
-};
-
   const handleSendMessage = useCallback(async () => {
-  if (message.trim()) {
-    const newUserMessage = { role: 'user', content: message };
-    setChatMessages(prev => [...prev, newUserMessage]);
-    setMessage('');
+    if (message.trim()) {
+      const newUserMessage = { role: 'user', content: message };
+      setChatMessages(prev => [...prev, newUserMessage]);
+      setMessage('');
 
-    const assistantReply = await sendMessageToGPT({
-      user_request: message,
-      submission: "no",
-      hint: "no",
-    });
+      const assistantReply = await sendMessageToGPT({
+        user_request: message,
+        submission: "no",
+        hint: "no",
+      });
 
-    setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
-  }
-}, [message, code]);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+    }
+  }, [message, code]);
 
   const handleKeyPress = useCallback((event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -164,18 +143,18 @@ const Problem = () => {
   }, [code, language]);
 
   const handleHintClick = useCallback(async () => {
-  const hintRequest = 'Can I have a hint?';
-  setChatMessages(prev => [...prev, { role: 'user', content: hintRequest }]);
-  setShowHintButton(false);
+    const hintRequest = 'Can I have a hint?';
+    setChatMessages(prev => [...prev, { role: 'user', content: hintRequest }]);
+    setShowHintButton(false);
 
-  const assistantReply = await sendMessageToGPT({
-    user_request: hintRequest,
-    submission: "no",
-    hint: "yes",
-  });
+    const assistantReply = await sendMessageToGPT({
+      user_request: hintRequest,
+      submission: "no",
+      hint: "yes",
+    });
 
-  setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
-}, [code]);
+    setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+  }, [code]);
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -186,21 +165,29 @@ const Problem = () => {
       let resultMsg = '';
       if (success) {
         resultMsg = `Output:\n${output}`;
+        setPassFailStatus('pass');
       } else {
         resultMsg = `Error:\n${error || 'Unknown error.'}`;
+        setPassFailStatus('fail');
       }
       setConsoleOutput(resultMsg);
     } catch (error) {
       setConsoleOutput('Error submitting code.');
+      setPassFailStatus('fail');
     }
   }, [code, language]);
+
+  const handleRetry = useCallback(() => {
+    setCode(getDefaultValue(language));
+    setConsoleOutput('');
+    setPassFailStatus(null);
+  }, [language]);
 
   useEffect(() => {
     async function loadProblem() {
       setLoading(true);
       setError(null);
       try {
-        // Set default pattern and difficulty to Sliding Window and Medium
         const pattern = location.state?.pattern || 'Sliding Window';
         const difficulty = location.state?.difficulty || 'Medium';
         const response = await fetchProblem({ pattern, difficulty });
@@ -224,7 +211,10 @@ const Problem = () => {
           height: '100vh',
           bgcolor: '#1e1e1e',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          minHeight: 0,
+          p: 0,
+          m: 0
         }}
       >
         {/* Dev Mode Banner */}
@@ -264,61 +254,59 @@ const Problem = () => {
             flex: 1,
             display: 'flex',
             flexDirection: 'row',
-            overflow: 'hidden',
-            justifyContent: aiPanelOpen ? 'flex-start' : 'center',
-            alignItems: aiPanelOpen ? 'stretch' : 'center',
+            alignItems: 'stretch',
+            justifyContent: 'center',
             minHeight: 0,
             transition: 'all 0.3s',
+            p: 0,
+            m: 0
           }}
+          aria-label="Problem Page Main Content"
         >
           {/* Problem Description - Left Side */}
-          <ProblemDescription problem={problem} loading={loading} testCases={testCases} />
+          <Box sx={{ width: '50%', minWidth: 0, height: '100%', minHeight: 0, p: 0, m: 0 }} aria-label="Problem Description Area">
+            <ProblemDescription problem={problem} loading={loading} />
+          </Box>
 
           {/* Code Editor Section - Middle */}
-          <CodeEditorPanel
+          <Box sx={{ width: '50%', minWidth: 0, height: '100%', minHeight: 0, p: 0, m: 0 }} aria-label="Code Editor Section">
+            <CodeEditorPanel
               code={code}
-              onCodeChange={setCode}
+              onCodeChange={handleCodeChange}
               language={language}
-              onLanguageChange={setLanguage}
-              onRun={handleRun}
-              onSubmit={async () => {
-                const submitRequest = 'Please review my submission.';
-                setChatMessages(prev => [...prev, { role: 'user', content: submitRequest }]);
-
-                const assistantReply = await sendMessageToGPT({
-                  user_request: submitRequest,
-                  submission: "yes",
-                  hint: "no",
-                });
-
-                setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
-              }}
+              onLanguageChange={handleLanguageChange}
+              onSubmit={handleSubmit}
               consoleTab={consoleTab}
-              onConsoleTabChange={setConsoleTab}
+              onConsoleTabChange={handleConsoleTabChange}
               consoleOutput={consoleOutput}
+              setAIPanelOpen={setAIPanelOpen}
+              passFailStatus={passFailStatus}
+              onRetry={handleRetry}
             />
+          </Box>
 
-          {/* AI Assistant - Right Side */}
-          <AIAssistantPanel
-            chatMessages={chatMessages}
-            message={message}
-            onMessageChange={handleMessageChange}
-            onKeyPress={handleKeyPress}
-            onSendMessage={handleSendMessage}
-            showHintButton={showHintButton}
-            onHintClick={handleHintClick}
-            sx={{
-              boxShadow: 6,
-              borderRadius: 2,
-              p: 0,
-              m: 2,
-              bgcolor: 'white',
-              minWidth: 340,
-              maxWidth: 400,
-              display: 'flex',
-              flexDirection: 'column',
-              height: 'calc(100% - 32px)'
-            }}
+          {/* AI Assistant - Right Side, only show if open */}
+          {aiPanelOpen && (
+            <AIAssistantPanel
+              chatMessages={chatMessages}
+              message={message}
+              onMessageChange={handleMessageChange}
+              onKeyPress={handleKeyPress}
+              onSendMessage={handleSendMessage}
+              showHintButton={showHintButton}
+              onHintClick={handleHintClick}
+              sx={{
+                boxShadow: 6,
+                borderRadius: 2,
+                p: 0,
+                m: 2,
+                bgcolor: 'white',
+                minWidth: 340,
+                maxWidth: 400,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 'calc(100% - 32px)'
+              }}
               header={{
                 icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
                 title: 'AI Help & Feedback',
@@ -327,11 +315,12 @@ const Problem = () => {
                   { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution.' }
                 ])
               }}
+              aria-label="AI Assistant Panel"
             />
           )}
         </Box>
 
-        <Modal open={openAIModal} onClose={() => setOpenAIModal(false)}>
+        <Modal open={openAIModal} onClose={() => setOpenAIModal(false)} aria-label="AI Assistant Modal">
           <Box
             sx={{
               position: 'absolute',
@@ -350,9 +339,10 @@ const Problem = () => {
               minWidth: { xs: '90vw', sm: 400 },
               minHeight: 400
             }}
+            aria-label="AI Assistant Modal Content"
           >
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <IconButton onClick={() => setOpenAIModal(false)}>
+              <IconButton onClick={() => setOpenAIModal(false)} aria-label="Close AI Assistant Modal">
                 <CloseIcon />
               </IconButton>
             </Box>
@@ -362,8 +352,15 @@ const Problem = () => {
               onMessageChange={handleMessageChange}
               onKeyPress={handleKeyPress}
               onSendMessage={handleSendMessage}
-              showHintButton={showHintButton}
-              onHintClick={handleHintClick}
+              header={{
+                icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
+                title: 'AI Help & Feedback',
+                onClose: () => setOpenAIModal(false),
+                onClearChat: () => setChatMessages([
+                  { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution.' }
+                ])
+              }}
+              aria-label="AI Assistant Panel in Modal"
             />
           </Box>
         </Modal>

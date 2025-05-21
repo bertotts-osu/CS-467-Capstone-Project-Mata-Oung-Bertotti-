@@ -1,123 +1,116 @@
 import React from 'react';
-import { Box, Button, FormControl, MenuItem, Select, Tabs, Tab } from '@mui/material';
+import { Box, Button, Tabs, Tab, Paper, Divider, Typography, Alert } from '@mui/material';
 import CodeEditor from './Editor';
+
+const pythonStarterCode = 'def solution(nums):\n    # Write your solution here\n    pass';
 
 const CodeEditorPanel = ({
   code,
   onCodeChange,
-  language,
-  onLanguageChange,
-  onRun,
   onSubmit,
   consoleTab,
   onConsoleTabChange,
   consoleOutput,
-  setAIPanelOpen
+  setAIPanelOpen,
+  passFailStatus,
+  onRetry
 }) => (
-  <Box sx={{ 
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    borderLeft: '1px solid #333',
-    borderRight: '1px solid #333'
-  }}>
-    {/* Hint Button */}
-    {setAIPanelOpen && (
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1, pt: 2 }}>
+  <Paper sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 2, boxShadow: 4, p: 0.5, bgcolor: '#fff', minHeight: 0, overflow: 'hidden', m: 0, p: 2, }} elevation={4}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        mb: 1,
+        mt: 1,
+        px: 1,
+      }}
+    >
+      <Button
+        variant="outlined"
+        color="info"
+        onClick={() => setAIPanelOpen && setAIPanelOpen(true)}
+        sx={{ fontSize: 13, px: 2, py: 1, height: 40 }}
+      >
+        Open AI Assistant
+      </Button>
+      <Typography variant="subtitle1" fontWeight={600} sx={{ color: 'text.secondary', fontSize: 15 }}>
+        Language: Python
+      </Typography>
+      {passFailStatus && (
         <Button
           variant="outlined"
-          color="info"
-          onClick={() => setAIPanelOpen(true)}
-          sx={{ mb: 1 }}
+          color="secondary"
+          onClick={onRetry}
+          sx={{ fontSize: 13, px: 2, py: 1, height: 40 }}
         >
-          Can I have a hint?
+          Retry
         </Button>
-      </Box>
+      )}
+      <Button
+        variant="contained"
+        color="success"
+        onClick={onSubmit}
+        sx={{ fontSize: 15, px: 3, py: 1, height: 40, fontWeight: 700, boxShadow: 2 }}
+      >
+        Submit
+      </Button>
+    </Box>
+    <Divider sx={{ mb: 1 }} />
+    {/* Pass/Fail Alert */}
+    {passFailStatus && (
+      <Alert severity={passFailStatus === 'pass' ? 'success' : 'error'} sx={{ mb: 1, fontWeight: 600, fontSize: 16 }}>
+        {passFailStatus === 'pass' ? '✅ Pass! All test cases succeeded.' : '❌ Fail. Try again!'}
+      </Alert>
     )}
-    {/* Language Selector and Buttons */}
-    <Box sx={{ 
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      p: 1,
-      borderBottom: '1px solid #333',
-      bgcolor: '#252526'
-    }}>
-      <FormControl size="small" sx={{ minWidth: 120 }}>
-        <Select
-          value={language}
-          onChange={onLanguageChange}
-          sx={{ 
-            color: 'white',
-            '.MuiOutlinedInput-notchedOutline': {
-              borderColor: '#333',
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#666',
-            },
-            '.MuiSvgIcon-root': {
-              color: 'white',
+    {/* Editor and Console as flex children */}
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <Box sx={{ flex: 1, minHeight: 40, overflow: 'hidden', borderRadius: 2, bgcolor: '#181a1b', p: 0.5, mb: 1, display: 'flex', flexDirection: 'column' }}>
+        <CodeEditor
+          value={code}
+          onChange={onCodeChange}
+          height="100%"
+          language="python"
+        />
+      </Box>
+      <Divider sx={{ mb: 0.5 }} />
+      <Box sx={{ height: 120, borderTop: '1px solid #333', bgcolor: '#23272b', borderRadius: 2, p: 0.5, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <Tabs
+          value={consoleTab}
+          onChange={onConsoleTabChange}
+          sx={{
+            minHeight: '24px',
+            borderBottom: '1px solid #333',
+            '.MuiTab-root': {
+              color: '#999',
+              minHeight: '30px',
+              fontSize: 12,
+              '&.Mui-selected': {
+                color: 'white'
+              }
             }
           }}
         >
-          <MenuItem value="python">Python</MenuItem>
-        </Select>
-      </FormControl>
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <Button variant="contained" color="success" onClick={onSubmit}>
-          Submit
-        </Button>
+          <Tab label="Console" />
+          <Tab label="Output" />
+        </Tabs>
+        <Box
+          sx={{
+            p: 2,
+            flex: 1,
+            minHeight: 0,
+            overflow: 'auto',
+            fontFamily: 'monospace',
+            fontSize: '0.85rem',
+            color: 'white',
+            whiteSpace: 'pre-wrap'
+          }}
+        >
+          {consoleOutput}
+        </Box>
       </Box>
     </Box>
-    {/* Editor */}
-    <Box sx={{ flex: 1, overflow: 'hidden' }}>
-      <CodeEditor
-        value={code}
-        onChange={onCodeChange}
-        height="100%"
-        language={language}
-      />
-    </Box>
-    {/* Console Output */}
-    <Box sx={{ 
-      height: '200px',
-      borderTop: '1px solid #333',
-      bgcolor: '#1e1e1e'
-    }}>
-      <Tabs 
-        value={consoleTab}
-        onChange={onConsoleTabChange}
-        sx={{
-          minHeight: '36px',
-          borderBottom: '1px solid #333',
-          '.MuiTab-root': {
-            color: '#999',
-            minHeight: '36px',
-            '&.Mui-selected': {
-              color: 'white'
-            }
-          }
-        }}
-      >
-        <Tab label="Console" />
-        <Tab label="Output" />
-      </Tabs>
-      <Box 
-        sx={{ 
-          p: 1.5,
-          height: 'calc(100% - 37px)',
-          overflow: 'auto',
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          color: 'white',
-          whiteSpace: 'pre-wrap'
-        }}
-      >
-        {consoleOutput}
-      </Box>
-    </Box>
-  </Box>
+  </Paper>
 );
 
 export default CodeEditorPanel; 

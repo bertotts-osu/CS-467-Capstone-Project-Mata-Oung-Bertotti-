@@ -219,7 +219,47 @@ def register_routes(app):
             from openai import AzureOpenAI
             import os
 
-            messages = request.get_json().get("messages", [])
+            data = request.get_json()
+            messages = data.get("messages", [])
+            if isinstance(messages, dict):
+                messages = [messages]
+            problem = data.get("problem", "")
+            code = data.get("code", "")
+
+            # Prepend problem and code as system messages for context
+            system_messages = []
+            if problem:
+                system_messages.append({
+                    "role": "system",
+                    "content": f"Problem Description:\n{problem}"
+                })
+            if code:
+                system_messages.append({
+                    "role": "system",
+                    "content": f"User's Current Code:\n{code}"
+                })
+            # Validate all messages have 'role' and 'content'
+            valid_messages = []
+            for msg in messages:
+                if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
+                    valid_messages.append(msg)
+                else:
+                    print('Skipping invalid message:', msg)
+
+            # If no valid messages, use the problem prompt as the first user message
+            if not valid_messages and problem:
+                valid_messages.append({
+                    "role": "user",
+                    "content": f"Problem: {problem}"
+                })
+
+            full_messages = system_messages + valid_messages
+            if not full_messages:
+                full_messages = [{
+                    "role": "system",
+                    "content": "No user message or problem context was provided."
+                }]
+            print('full_messages:', full_messages)
 
             client = AzureOpenAI(
                 api_key=os.getenv("AZURE_OPENAI_KEY"),
@@ -229,7 +269,7 @@ def register_routes(app):
 
             response = client.chat.completions.create(
                 model=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-                messages=messages,
+                messages=full_messages,
                 temperature=0.7
             )
 

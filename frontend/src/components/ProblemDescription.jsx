@@ -1,67 +1,83 @@
 import React from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography, Divider } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 
 const ProblemDescription = ({ problem, loading, testCases }) => (
   <Paper
+    elevation={4}
     sx={{
       width: "100%",
       height: "100%",
-      bgcolor: "white",
-      borderRadius: 0,
-      overflow: "auto",
+      bgcolor: "#fff",
+      borderRadius: 2,
       display: "flex",
       flexDirection: "column",
+      boxShadow: 4,
+      borderLeft: "6px solid #1976d2",
+      minHeight: 0,
+      overflow: "hidden",
+      p: 2,
+      m: 0
     }}
-    elevation={0}
   >
-    <Box sx={{ p: 3, flex: 1 }}>
-      <Typography variant="h6" gutterBottom>
-        Problem Description
-      </Typography>
-      {loading ? (
-        <Typography variant="body2">Loading...</Typography>
-      ) : problem ? (
+    <Typography variant="h4" fontWeight={700} gutterBottom>
+      Problem Description
+    </Typography>
+    <Divider sx={{ mb: 2 }} />
+    <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+      {loading && (
+        <Typography variant="body1" fontSize={18}>Loading...</Typography>
+      )}
+      {!loading && problem && (
         <>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
             {problem.name}
           </Typography>
           <Typography
-            variant="body2"
-            component="pre"
+            variant="body1"
             sx={{
-              whiteSpace: "pre-wrap",
-              fontFamily: "monospace",
               mb: 2,
+              fontSize: "1.1rem",
+              color: "text.primary",
+              lineHeight: 1.7,
             }}
           >
             {problem.prompt}
           </Typography>
-          <Typography variant="subtitle2" gutterBottom>
-            Example:
-          </Typography>
-          <Typography
-            variant="body2"
-            component="pre"
+          <Box
             sx={{
-              fontFamily: "monospace",
-              bgcolor: "#f5f5f5",
-              p: 1,
-              borderRadius: 1,
+              bgcolor: "#e3f2fd",
+              p: 2,
+              borderRadius: 2,
+              mt: 1,
+              borderLeft: "4px solid #1976d2",
             }}
           >
-            Input: [
-            {Array.isArray(problem.example.input)
-              ? problem.example.input.join(", ")
-              : Object.values(problem.example.input).join(", ")}
-            ]{"\n"}
-            Output: {problem.example.output}
-            {/* Input: n = 4 Output: 3 Explanation: F(4) = F(3) + F(2) = 2 + 1 = 3 */}
-          </Typography>
+            <Typography variant="subtitle2" color="text.secondary">
+              Example:
+            </Typography>
+            <Typography
+              variant="body2"
+              component="pre"
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "1rem",
+                color: "#333",
+              }}
+            >
+              Input: [
+              {Array.isArray(problem.example.input)
+                ? problem.example.input.join(", ")
+                : Object.values(problem.example.input).join(", ")}
+              ]{"\n"}
+              Output: {problem.example.output}
+            </Typography>
+          </Box>
         </>
-      ) : (
-        <Typography variant="body2" color="error">
+      )}
+      {!loading && !problem && (
+        <Typography variant="body1" color="error" fontSize={18}>
           No problem found.
         </Typography>
       )}

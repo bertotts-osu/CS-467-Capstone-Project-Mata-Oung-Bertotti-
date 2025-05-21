@@ -25,6 +25,7 @@ export default function Layout({ children, backgroundImage, centeredContent = tr
         backgroundRepeat: "no-repeat",
         px: 2,
       }}
+      aria-label="Main Layout Container"
     >
       <Navbar />
 
@@ -36,6 +37,7 @@ export default function Layout({ children, backgroundImage, centeredContent = tr
           color="white"
           textAlign="center"
           fontWeight={500}
+          aria-label="Dev Mode Banner"
         >
           <Typography variant="body2">
             ⚠️ Dev Mode is ON — Auth is currently bypassed for testing
@@ -50,6 +52,7 @@ export default function Layout({ children, backgroundImage, centeredContent = tr
         justifyContent={centeredContent ? { xs: "flex-start", md: "center" } : "flex-start"}
         py={centeredContent ? { xs: 4, md: 0 } : 4}
         alignItems="center"
+        aria-label="Layout Content Area"
       >
         <Box
           width="100%"
@@ -60,6 +63,7 @@ export default function Layout({ children, backgroundImage, centeredContent = tr
           boxShadow={4}
           p={4}
           my={centeredContent ? 0 : 4}
+          aria-label="Layout Inner Content Box"
         >
           {children}
         </Box>
