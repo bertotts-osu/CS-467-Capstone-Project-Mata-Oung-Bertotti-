@@ -38,7 +38,7 @@ def modify_problem(original_prompt, openAI_client):
     return modified_problem
 
 
-def generate_test_cases(original_prompt, openAI_client):
+def generate_test_cases(prompt, openAI_client):
     """
     Takes an original problem prompt and returns test cases to test the problem's solution.
     """
@@ -47,20 +47,28 @@ def generate_test_cases(original_prompt, openAI_client):
          You are an AI tutor helping a user practice coding problems based on algorithm patterns.
 
          Your task:
-            1. Generate test cases for the given problem prompt that cover a variety of edge cases.
-            2. Provide both input and expected output for each test case.
-            3. Just provide the test cases, no explanation or summary.
-            4. Ensure that the test cases are written clearly and that they test different aspects of the problem.
-            5. Do **not** include the `index` field in the problem.
+            1. Generate 3 test cases that cover normal and edge cases.
+            2. Return only the test cases as a JSON list.
+            3. Each test case must be a dictionary with:
+                - "input": a string of **valid Python variable assignments** (e.g., [1, 2, 3] or 4 or "test")
+                - "expected_output": the expected return value from the user's function
+            4. The assignments must use only simple data types: lists, integers, floats, strings, booleans, or None.
+            5. Return ONLY a raw JSON list of 3 test cases — no explanation, no extra text, no markdown.
+            6. Do NOT return named variables for the input, just the raw value. For example DO NOT DO THIS, 'arr = [42]'
         """
     )
 
     # build the conversation context
     messages = [
         {"role": "system", "content": "You are an Algorithm Mentor"},
-        {"role": "user", "content": f"{instruction}\n\nProblem:\n{original_prompt}"}
+        {"role": "user", "content": f"{instruction}\n\nProblem:\n{prompt}"}
     ]
 
     result = openAI_client.send_request(messages)
-    test_cases = result["choices"][0]["message"]["content"]
-    return test_cases
+    raw_output = result["choices"][0]["message"]["content"]
+
+    try:
+        test_cases = json.loads(raw_output)
+        return test_cases[:3]
+    except json.JSONDecodeError:
+        raise ValueError("OpenAI response was not valid JSON.")
