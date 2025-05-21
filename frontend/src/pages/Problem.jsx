@@ -17,7 +17,9 @@ import {
   Snackbar,
   Modal,
   Fab,
-  Tooltip
+  Tooltip,
+  AppBar,
+  Toolbar
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -30,11 +32,12 @@ import { executeCode, fetchProblem } from '../http_requests/ProblemAPIs';
 import ProblemDescription from '../components/ProblemDescription';
 import CodeEditorPanel from '../components/CodeEditorPanel';
 import AIAssistantPanel from '../components/AIAssistantPanel';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { devMode } from "../config";
 import { sendMessageToGPT } from '../http_requests/ChatGptAPI';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import Navbar from '../components/Navbar';
 
 const Problem = () => {
   const [code, setCode] = useState('def solution(nums):\n    # Write your solution here\n    pass');
@@ -56,6 +59,7 @@ const Problem = () => {
   const location = useLocation();
   const [openAIModal, setOpenAIModal] = useState(false);
   const [aiPanelOpen, setAIPanelOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleCodeChange = useCallback((newValue) => {
     try {
@@ -203,6 +207,8 @@ const Problem = () => {
 
   return (
     <ErrorBoundary>
+      {/* Navigation Bar */}
+      <Navbar />
       <Box
         sx={{
           width: '100vw',
@@ -212,9 +218,6 @@ const Problem = () => {
           flexDirection: 'column'
         }}
       >
-        {/* Navbar placeholder - height matches Layout's navbar */}
-        <Box sx={{ height: '64px', bgcolor: 'primary.main' }} />
-
         {/* Dev Mode Banner */}
         {devMode && (
           <Box

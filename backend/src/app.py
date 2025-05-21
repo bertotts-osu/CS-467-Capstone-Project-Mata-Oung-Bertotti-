@@ -50,4 +50,9 @@ def start_app(config_class=DevConfig):
     # initialize routes
     register_routes(app)
 
+    # Health check root route
+    @app.route("/")
+    def home():
+        return "Backend is running!", 200
+
     return app

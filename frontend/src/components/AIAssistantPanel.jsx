@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Paper, Typography, TextField, IconButton, Button, Divider } from '@mui/material';
+import { Box, Paper, Typography, TextField, IconButton, Button, Divider, Tooltip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import FeedbackIcon from '@mui/icons-material/Feedback';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const AIAssistantPanel = ({
   chatMessages,
@@ -10,13 +12,20 @@ const AIAssistantPanel = ({
   onKeyPress,
   onSendMessage,
   showHintButton,
-  onHintClick
+  onHintClick,
+  header
 }) => {
   const [hintUsed, setHintUsed] = useState(false);
 
   const handleHintClick = () => {
     setHintUsed(true);
     if (onHintClick) onHintClick();
+  };
+
+  const handleClearChat = () => {
+    if (typeof header?.onClearChat === 'function') {
+      header.onClearChat();
+    }
   };
 
   return (
@@ -36,7 +45,7 @@ const AIAssistantPanel = ({
       elevation={0}
     >
       {/* Header */}
-      <Box sx={{
+      <Box sx={{ 
         display: 'flex',
         alignItems: 'center',
         bgcolor: '#e3f2fd',
@@ -44,12 +53,25 @@ const AIAssistantPanel = ({
         borderTopRightRadius: 8,
         p: 2,
         borderBottom: '1px solid #bbdefb',
-        gap: 1
+        gap: 1,
+        position: 'relative'
       }}>
-        <FeedbackIcon color="primary" sx={{ mr: 1 }} />
-        <Typography variant="h6" fontWeight={700}>
-          AI Help & Feedback
+        {header?.icon}
+        <Typography variant="h6" fontWeight={700} sx={{ flex: 1 }}>
+          {header?.title || 'AI Help & Feedback'}
         </Typography>
+        {header?.onClearChat && (
+          <Tooltip title="Clear Chat">
+            <IconButton size="small" onClick={handleClearChat} sx={{ position: 'absolute', right: 40, top: 8 }}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+        {header?.onClose && (
+          <IconButton size="small" onClick={header.onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        )}
       </Box>
       {/* Chat Messages */}
       <Box sx={{ 
@@ -85,14 +107,6 @@ const AIAssistantPanel = ({
         ))}
       </Box>
       <Divider sx={{ my: 0 }} />
-      {/* Hint Button (one-time, above input) */}
-      {!hintUsed && showHintButton && (
-        <Box sx={{ px: 2, pt: 2, pb: 0, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button variant="outlined" size="small" onClick={handleHintClick} sx={{ whiteSpace: 'nowrap' }}>
-            Can I have a hint?
-          </Button>
-        </Box>
-      )}
       {/* Message Input */}
       <Box sx={{ display: 'flex', gap: 1, p: 2, bgcolor: '#f5f7fa', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
         <TextField
