@@ -11,9 +11,10 @@ const CodeEditorPanel = ({
   consoleOutput,
   setAIPanelOpen,
   passFailStatus,
-  onRetry
+  onRetry,
+  onRun
 }) => (
-  <Paper sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 2, boxShadow: 4, p: 0.5, bgcolor: '#fff', minHeight: 0, overflow: 'hidden', m: 0, p: 2, }} elevation={4}>
+  <Paper sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 2, boxShadow: 4, bgcolor: '#fff', minHeight: 0, overflow: 'hidden', m: 0, p: 2 }} elevation={4}>
     <Box
       sx={{
         display: 'flex',

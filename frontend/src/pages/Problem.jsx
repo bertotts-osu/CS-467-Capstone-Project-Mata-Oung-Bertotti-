@@ -81,31 +81,24 @@ const Problem = () => {
   };
 
   const handleSendMessage = useCallback(async () => {
-    if (message.trim()) {
-      try {
-        const newUserMessage = { role: "user", content: message };
-        const updatedMessages = [...chatMessages, newUserMessage];
-
-        setChatMessages(updatedMessages);
-        setMessage("");
-
-        // Always send the current problem prompt as context
-        const assistantReply = await sendMessageToGPT({
-          messages: updatedMessages,
-          problem: problem?.prompt || "", // always use the current problem prompt
-          code: code || "",
-        });
-
-        setChatMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: assistantReply },
-        ]);
-      } catch (error) {
-        console.error("Chat error:", error);
-        setError("Failed to send message. Please try again.");
-      }
+    if (!message.trim()) {
+      setError("Please enter a message.");
+      return;
     }
-  }, [message, chatMessages, problem, code]);
+    const newUserMessage = { role: 'user', content: message };
+    const updatedMessages = [...chatMessages, newUserMessage];
+    setChatMessages(updatedMessages);
+    setMessage('');
+
+    const assistantReply = await sendMessageToGPT({
+      messages: updatedMessages,
+      problem: problem?.prompt || '',
+      code: code || '',
+      console_output: consoleOutput || '',
+    });
+
+    setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+  }, [message, chatMessages, problem, code, consoleOutput]);
 
   const handleKeyPress = useCallback(
     (event) => {
@@ -116,24 +109,19 @@ const Problem = () => {
     },
     [handleSendMessage]
   );
-
-  const handleHintClick = useCallback(() => {
-    setAIPanelOpen(true);
-    setChatMessages((prev) => [
-      ...prev,
-      { role: "user", content: "Can I have a hint?" },
-    ]);
+  const handleHintClick = useCallback(async () => {
+    const hintRequest = 'Can I have a hint?';
+    setChatMessages(prev => [...prev, { role: 'user', content: hintRequest }]);
     setShowHintButton(false);
-    setTimeout(() => {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "I'm analyzing your code to provide better assistance...",
-        },
-      ]);
-    }, 1000);
-  }, []);
+
+    const assistantReply = await sendMessageToGPT({
+      user_request: hintRequest,
+      submission: "no",
+      hint: "yes",
+    });
+
+    setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+  }, [code]);
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -189,8 +177,8 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`;
       setLoading(true);
       setError(null);
       try {
-        const pattern = location.state?.pattern || "Sliding Window";
-        const difficulty = location.state?.difficulty || "Medium";
+        const pattern = location.state?.pattern || 'Sliding Window';
+        const difficulty = location.state?.difficulty || 'Medium';
         const response = await fetchProblem({ pattern, difficulty });
         setProblem(response.data);
 
@@ -326,6 +314,20 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`;
               onMessageChange={handleMessageChange}
               onKeyPress={handleKeyPress}
               onSendMessage={handleSendMessage}
+              showHintButton={showHintButton}
+              onHintClick={handleHintClick}
+              sx={{
+                boxShadow: 6,
+                borderRadius: 2,
+                p: 0,
+                m: 2,
+                bgcolor: 'white',
+                minWidth: 340,
+                maxWidth: 400,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 'calc(100% - 32px)'
+              }}
               header={{
                 icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
                 title: "AI Help & Feedback",

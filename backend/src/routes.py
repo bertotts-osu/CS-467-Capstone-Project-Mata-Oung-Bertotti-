@@ -1,6 +1,5 @@
 from flask import request, g
 from marshmallow import ValidationError
-
 from src.chatgpt.curated_tasks import modify_problem, generate_test_cases
 from src.db.problems import get_problem, add_problem
 from src.db.schemas import ProblemSchema, AttemptSchema
@@ -11,12 +10,15 @@ from src.exceptions import ProblemNotFound
 from src.services.test_runner import run_test_cases_against_solution
 from src.verify_token import verify_token
 from functools import wraps
+import subprocess
+import tempfile
+import os
+from .chatgpt.api import chatgpt_bp
 
 AUTH = "/auth"
 PROBLEMS = "/problems"
 USERS = "/users"
 ATTEMPTS = "/attempts"
-
 
 def register_routes(app):
 
@@ -142,8 +144,11 @@ def register_routes(app):
     def login_user():
         try:
             data = request.get_json()
-            username = data["username"]
-            password = data["password"]
+            username = data.get("username")
+            password = data.get("password")
+
+            if not username or not password:
+                return {"error": "Username and password are required."}, 400
 
             response = app.cognito_client.initiate_auth(
                 ClientId=app.config["COGNITO_APP_CLIENT_ID"],
@@ -269,6 +274,7 @@ def register_routes(app):
             print("GPT API error:", str(e))
             return {"error": "GPT API failed", "details": str(e)}, 500
 
+    app.register_blueprint(chatgpt_bp)
 
 def require_auth(route):
     @wraps(route)
