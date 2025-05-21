@@ -16,6 +16,7 @@ def start_app(config_class=DevConfig):
 
     app = Flask(__name__)
     app.config.from_object(config_class)
+    CORS(app)  # Enable CORS for all routes
 
     # setup cors for cross-origin requests
     if config_class == DevConfig:

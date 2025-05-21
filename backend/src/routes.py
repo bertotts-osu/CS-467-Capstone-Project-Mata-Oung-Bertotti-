@@ -220,7 +220,24 @@ def register_routes(app):
             from openai import AzureOpenAI
             import os
 
-            messages = request.get_json().get("messages", [])
+            data = request.get_json()
+            messages = data.get("messages", [])
+            problem = data.get("problem", "")
+            code = data.get("code", "")
+
+            # Prepend problem and code as system messages for context
+            system_messages = []
+            if problem:
+                system_messages.append({
+                    "role": "system",
+                    "content": f"Problem Description:\n{problem}"
+                })
+            if code:
+                system_messages.append({
+                    "role": "system",
+                    "content": f"User's Current Code:\n{code}"
+                })
+            full_messages = system_messages + messages
 
             client = AzureOpenAI(
                 api_key=os.getenv("AZURE_OPENAI_KEY"),
@@ -230,7 +247,7 @@ def register_routes(app):
 
             response = client.chat.completions.create(
                 model=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-                messages=messages,
+                messages=full_messages,
                 temperature=0.7
             )
 

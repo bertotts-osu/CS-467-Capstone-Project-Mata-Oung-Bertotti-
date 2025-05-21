@@ -105,46 +105,29 @@ const Problem = () => {
     setMessage(event.target.value);
   };
 
-  const sendMessageToGPT = async (messages) => {
+  const handleSendMessage = useCallback(async () => {
+    if (message.trim()) {
       try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ messages }),
+        const newUserMessage = { role: 'user', content: message };
+        const updatedMessages = [...chatMessages, newUserMessage];
+
+        setChatMessages(updatedMessages);
+        setMessage('');
+
+        // Always send the current problem prompt as context
+        const assistantReply = await sendMessageToGPT({
+          messages: updatedMessages,
+          problem: problem?.prompt || '', // always use the current problem prompt
+          code: code || '',
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to get AI response.');
-        }
-
-        const data = await response.json();
-        return data.reply;
+        setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
       } catch (error) {
-        console.error('Error communicating with GPT API:', error);
-        return 'Sorry, there was an error trying to help with your solution.';
+        console.error('Chat error:', error);
+        setError('Failed to send message. Please try again.');
       }
-  };
-
-  const handleSendMessage = useCallback(async () => {
-  if (message.trim()) {
-    try {
-      const newUserMessage = { role: 'user', content: message };
-      const updatedMessages = [...chatMessages, newUserMessage];
-
-      setChatMessages(updatedMessages);
-      setMessage('');
-
-      const assistantReply = await sendMessageToGPT(updatedMessages);
-
-      setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
-    } catch (error) {
-      console.error('Chat error:', error);
-      setError('Failed to send message. Please try again.');
     }
-  }
-}, [message, chatMessages]);
+  }, [message, chatMessages, problem, code]);
 
   const handleKeyPress = useCallback((event) => {
     if (event.key === 'Enter' && !event.shiftKey) {

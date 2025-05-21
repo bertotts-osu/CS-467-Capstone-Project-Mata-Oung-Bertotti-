@@ -20,47 +20,41 @@ const CodeEditorPanel = ({
       sx={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: 2,
         mb: 1,
         mt: 1,
         px: 1,
       }}
     >
-      {/* Left controls */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Button
+        variant="outlined"
+        color="info"
+        onClick={() => setAIPanelOpen && setAIPanelOpen(true)}
+        sx={{ fontSize: 13, px: 2, py: 1, height: 40 }}
+      >
+        Open AI Assistant
+      </Button>
+      <Typography variant="subtitle1" fontWeight={600} sx={{ color: 'text.secondary', fontSize: 15 }}>
+        Language: Python
+      </Typography>
+      {passFailStatus && (
         <Button
           variant="outlined"
-          color="info"
-          onClick={() => setAIPanelOpen && setAIPanelOpen(true)}
+          color="secondary"
+          onClick={onRetry}
           sx={{ fontSize: 13, px: 2, py: 1, height: 40 }}
         >
-          Open AI Assistant
+          Retry
         </Button>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ color: 'text.secondary', fontSize: 15 }}>
-          Language: Python
-        </Typography>
-      </Box>
-      {/* Right controls */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        {passFailStatus && (
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={onRetry}
-            sx={{ fontSize: 13, px: 2, py: 1, height: 40 }}
-          >
-            Retry
-          </Button>
-        )}
-        <Button
-          variant="contained"
-          color="success"
-          onClick={onSubmit}
-          sx={{ fontSize: 15, px: 3, py: 1, height: 40, fontWeight: 700, boxShadow: 2 }}
-        >
-          Submit
-        </Button>
-      </Box>
+      )}
+      <Button
+        variant="contained"
+        color="success"
+        onClick={onSubmit}
+        sx={{ fontSize: 15, px: 3, py: 1, height: 40, fontWeight: 700, boxShadow: 2 }}
+      >
+        Submit
+      </Button>
     </Box>
     <Divider sx={{ mb: 1 }} />
     {/* Pass/Fail Alert */}
