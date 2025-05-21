@@ -2,8 +2,6 @@ import React from 'react';
 import { Box, Button, Tabs, Tab, Paper, Divider, Typography, Alert } from '@mui/material';
 import CodeEditor from './Editor';
 
-const pythonStarterCode = 'def solution(nums):\n    # Write your solution here\n    pass';
-
 const CodeEditorPanel = ({
   code,
   onCodeChange,

@@ -1,17 +1,16 @@
 from flask import request, g
 from marshmallow import ValidationError
 
-from src.chatgpt.curated_tasks import modify_problem
+from src.chatgpt.curated_tasks import modify_problem, generate_test_cases
 from src.db.problems import get_problem, add_problem
-from src.db.schemas import ProblemSchema
-from src.db.user_attemtps import add_or_update_user_attempt
+from src.db.schemas import ProblemSchema, AttemptSchema
+from src.db.user_attemtps import add_or_update_user_attempt, get_current_user_attempt, \
+    update_user_attempt_result_with_record
 from src.db.user_progress import get_user_profile, create_user_profile
 from src.exceptions import ProblemNotFound
+from src.services.test_runner import run_test_cases_against_solution
 from src.verify_token import verify_token
 from functools import wraps
-import subprocess
-import tempfile
-import os
 
 AUTH = "/auth"
 PROBLEMS = "/problems"
@@ -27,23 +26,6 @@ def register_routes(app):
         if not user:
             return create_user_profile(user_id)
         return user, 200
-
-    # @app.route(PROBLEMS, methods=["GET"])
-    # @require_auth
-    # def fetch_problem():
-    #     pattern = request.args.get('pattern')
-    #     difficulty = request.args.get('difficulty')
-    #
-    #     if not pattern or not difficulty:
-    #         return {"error": "Missing query parameter."}, 400
-    #     try:
-    #         problem = get_problem(pattern, difficulty)
-    #         modified_problem = modify_problem(problem, app.openai_client)
-    #         return modified_problem, 200
-    #     except ProblemNotFound as e:
-    #         return {"error": str(e)}, 404
-    #     except Exception as e:
-    #         return {"error": str(e)}, 500
 
     @app.route(PROBLEMS, methods=["GET"])
     @require_auth
@@ -81,7 +63,53 @@ def register_routes(app):
         except Exception as e:
             return {"error": str(e)}, 500
 
-    @app.route(AUTH + "/signup", methods=["POST"])
+    @app.route(ATTEMPTS + "/<attempt_id>", methods=["PATCH"])
+    @require_auth
+    def process_problem_attempt(attempt_id):
+        # Validate the attempt_id using your schema
+        schema = AttemptSchema()
+        try:
+            schema.load({"attempt_id": attempt_id})
+        except ValidationError as e:
+            return {"error": "Invalid attempt_id", "error_details": e.messages}, 400
+
+        # Retrieve the attempt record
+        try:
+            attempt = get_current_user_attempt(attempt_id)
+            if not attempt:
+                return {"error": "Attempt not found."}, 404
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+        prompt = attempt["modified_prompt"]
+
+        # Extract user code from the request body
+        data = request.get_json()
+        user_code = data.get("code")
+        if not user_code:
+            return {"error": "Missing 'code' in request body"}, 400
+
+        # Generate and run test cases
+        try:
+            test_cases = generate_test_cases(prompt, app.openai_client)
+            test_results = run_test_cases_against_solution(user_code, test_cases)
+        except Exception as e:
+            return {"error": f"Test execution failed: {str(e)}"}, 500
+
+        overall_passed = all(r["result"] == "passed" for r in test_results)
+
+        # Update the attempt record with the test result
+        try:
+            updated_attempt = update_user_attempt_result_with_record(attempt, overall_passed)
+        except Exception as e:
+            return {"error": f"Failed to update attempt: {str(e)}"}, 500
+
+        return {
+            "result": overall_passed,
+            "result_details": test_results,
+        }, 200
+
+    @app.route(AUTH + "/signup", methods=['POST'])
     def register_user():
         try:
             data = request.get_json()
@@ -110,7 +138,7 @@ def register_routes(app):
         except Exception as e:
             return {"error": str(e)}, 400
 
-    @app.route(AUTH + "/login", methods=["POST"])
+    @app.route(AUTH + "/login", methods=['POST'])
     def login_user():
         try:
             data = request.get_json()
@@ -144,7 +172,7 @@ def register_routes(app):
         except Exception as e:
             return {"error": str(e)}, 500
 
-    @app.route(PROBLEMS, methods=["POST"])
+    @app.route(PROBLEMS, methods=['POST'])
     @require_auth
     def create_new_problem():
         body = request.get_json()
@@ -173,46 +201,6 @@ def register_routes(app):
                 return {"error": str(e)}, 500
 
         return {"data": {"problems": created_problems}}, 201
-
-    @app.route(ATTEMPTS, methods=["POST"])
-    @require_auth
-    def process_problem_attempt():
-        body = request.get_json()
-
-        # result = evaluate_code(attempt)
-        # add_record_of_attempt(attempt, result)
-        return result, 200
-
-    @app.route('/execute', methods=['POST'])
-    @require_auth
-    def execute_code():
-        data = request.get_json()
-        code = data.get('code')
-        language = data.get('language', 'python')
-        input_data = data.get('input', '')
-        if not code or language != 'python':
-            return {"error": "Only Python code execution is supported in this demo."}, 400
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp:
-                temp.write(code)
-                temp_filename = temp.name
-            try:
-                result = subprocess.run(
-                    ['python', temp_filename],
-                    input=input_data.encode(),
-                    capture_output=True,
-                    timeout=5
-                )
-                output = result.stdout.decode()
-                error = result.stderr.decode()
-                success = result.returncode == 0
-            finally:
-                os.remove(temp_filename)
-            return {"output": output, "error": error, "success": success}, 200
-        except subprocess.TimeoutExpired:
-            return {"output": "", "error": "Execution timed out.", "success": False}, 200
-        except Exception as e:
-            return {"output": "", "error": str(e), "success": False}, 500
 
     @app.route('/api/chat', methods=['POST'])
     def chat_with_gpt():

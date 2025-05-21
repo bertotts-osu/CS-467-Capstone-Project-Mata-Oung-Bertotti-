@@ -17,11 +17,12 @@ export async function fetchProblem({ pattern, difficulty }) {
   return response;
 }
 
-export async function executeCode({ code, language, input }) {
+export async function executeCode({ code }) {
   const token = localStorage.getItem("authToken");
-  const response = await axios.post(
-    `${import.meta.env.VITE_SERVER_URL}/execute`,
-    { code, language, input },
+  const attemptId = localStorage.getItem("attemptId");
+  const response = await axios.patch(
+    `${import.meta.env.VITE_SERVER_URL}/attempts/${attemptId}`,
+    { code },
     {
       headers: {
         "Content-Type": "application/json",
@@ -30,4 +31,4 @@ export async function executeCode({ code, language, input }) {
     }
   );
   return response;
-} 
+}
