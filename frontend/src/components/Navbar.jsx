@@ -29,20 +29,21 @@ export default function Navbar() {
   ];
 
   return (
-    <AppBar position="static" color="primary" sx={{ width: '100%' }}>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+    <AppBar position="static" color="primary" sx={{ width: '100%' }} aria-label="Main Navigation Bar">
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }} aria-label="Navigation Toolbar">
         {/* App Title */}
         <Typography
           variant="h6"
           component={RouterLink}
           to="/"
           sx={{ textDecoration: "none", color: "inherit", fontWeight: 600 }}
+          aria-label="App Title: ChatGPT Challenge"
         >
           ChatGPT Challenge
         </Typography>
 
         {/* Desktop Navigation Links */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }} aria-label="Desktop Navigation Links">
           {navLinks.map(link => (
             <Button
               key={link.to}
@@ -60,16 +61,17 @@ export default function Navbar() {
                   bgcolor: 'rgba(255,255,255,0.15)'
                 }
               }}
+              aria-label={`Navigate to ${link.label}`}
             >
               {link.label}
             </Button>
           ))}
           {isAuthenticated ? (
-            <Button color="inherit" onClick={handleLogout} startIcon={<LogoutIcon />}>Logout</Button>
+            <Button color="inherit" onClick={handleLogout} startIcon={<LogoutIcon />} aria-label="Logout">Logout</Button>
           ) : (
             <>
-              <Button color="inherit" component={RouterLink} to="/login" startIcon={<LoginIcon />}>Login</Button>
-              <Button color="inherit" component={RouterLink} to="/signup" startIcon={<PersonAddIcon />}>Sign Up</Button>
+              <Button color="inherit" component={RouterLink} to="/login" startIcon={<LoginIcon />} aria-label="Login">Login</Button>
+              <Button color="inherit" component={RouterLink} to="/signup" startIcon={<PersonAddIcon />} aria-label="Sign Up">Sign Up</Button>
             </>
           )}
         </Box>
@@ -80,6 +82,7 @@ export default function Navbar() {
           edge="end"
           sx={{ display: { xs: 'flex', md: 'none' } }}
           onClick={() => setDrawerOpen(true)}
+          aria-label="Open mobile navigation menu"
         >
           <MenuIcon />
         </IconButton>
@@ -89,11 +92,12 @@ export default function Navbar() {
           anchor="right"
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
+          aria-label="Mobile Navigation Drawer"
         >
           <Box sx={{ width: 240 }} role="presentation" onClick={() => setDrawerOpen(false)}>
             <List>
               {navLinks.map(link => (
-                <ListItem button key={link.to} component={RouterLink} to={link.to} selected={location.pathname === link.to}>
+                <ListItem button key={link.to} component={RouterLink} to={link.to} selected={location.pathname === link.to} aria-label={`Navigate to ${link.label}`}>
                   <ListItemIcon>{link.icon}</ListItemIcon>
                   <ListItemText primary={link.label} />
                 </ListItem>
@@ -102,17 +106,17 @@ export default function Navbar() {
             <Divider />
             <List>
               {isAuthenticated ? (
-                <ListItem button onClick={handleLogout}>
+                <ListItem button onClick={handleLogout} aria-label="Logout">
                   <ListItemIcon><LogoutIcon /></ListItemIcon>
                   <ListItemText primary="Logout" />
                 </ListItem>
               ) : (
                 <>
-                  <ListItem button component={RouterLink} to="/login">
+                  <ListItem button component={RouterLink} to="/login" aria-label="Login">
                     <ListItemIcon><LoginIcon /></ListItemIcon>
                     <ListItemText primary="Login" />
                   </ListItem>
-                  <ListItem button component={RouterLink} to="/signup">
+                  <ListItem button component={RouterLink} to="/signup" aria-label="Sign Up">
                     <ListItemIcon><PersonAddIcon /></ListItemIcon>
                     <ListItemText primary="Sign Up" />
                   </ListItem>

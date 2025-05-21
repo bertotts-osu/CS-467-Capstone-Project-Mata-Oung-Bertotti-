@@ -215,7 +215,10 @@ const Problem = () => {
           height: '100vh',
           bgcolor: '#1e1e1e',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          minHeight: 0,
+          p: 0,
+          m: 0
         }}
       >
         {/* Dev Mode Banner */}
@@ -255,44 +258,33 @@ const Problem = () => {
             flex: 1,
             display: 'flex',
             flexDirection: 'row',
-            overflow: 'hidden',
-            justifyContent: aiPanelOpen ? 'flex-start' : 'center',
-            alignItems: aiPanelOpen ? 'stretch' : 'center',
+            alignItems: 'stretch',
+            justifyContent: 'center',
             minHeight: 0,
             transition: 'all 0.3s',
+            p: 0,
+            m: 0
           }}
+          aria-label="Problem Page Main Content"
         >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 0,
-              width: '100%',
-              height: '100%',
-              alignItems: 'stretch',
-              justifyContent: 'flex-start',
-              transition: 'all 0.3s',
-            }}
-          >
-            {/* Problem Description - Left Side */}
-            <Box sx={{ width: '50%', minWidth: 0, height: '100%' }}>
-              <ProblemDescription problem={problem} loading={loading} />
-            </Box>
+          {/* Problem Description - Left Side */}
+          <Box sx={{ width: '50%', minWidth: 0, height: '100%', minHeight: 0, p: 0, m: 0 }} aria-label="Problem Description Area">
+            <ProblemDescription problem={problem} loading={loading} />
+          </Box>
 
-            {/* Code Editor Section - Middle */}
-            <Box sx={{ width: '50%', minWidth: 0, height: '100%' }}>
-              <CodeEditorPanel
-                code={code}
-                onCodeChange={handleCodeChange}
-                language={language}
-                onLanguageChange={handleLanguageChange}
-                onSubmit={handleSubmit}
-                consoleTab={consoleTab}
-                onConsoleTabChange={handleConsoleTabChange}
-                consoleOutput={consoleOutput}
-                setAIPanelOpen={setAIPanelOpen}
-              />
-            </Box>
+          {/* Code Editor Section - Middle */}
+          <Box sx={{ width: '50%', minWidth: 0, height: '100%', minHeight: 0, p: 0, m: 0 }} aria-label="Code Editor Section">
+            <CodeEditorPanel
+              code={code}
+              onCodeChange={handleCodeChange}
+              language={language}
+              onLanguageChange={handleLanguageChange}
+              onSubmit={handleSubmit}
+              consoleTab={consoleTab}
+              onConsoleTabChange={handleConsoleTabChange}
+              consoleOutput={consoleOutput}
+              setAIPanelOpen={setAIPanelOpen}
+            />
           </Box>
 
           {/* AI Assistant - Right Side, only show if open */}
@@ -303,20 +295,6 @@ const Problem = () => {
               onMessageChange={handleMessageChange}
               onKeyPress={handleKeyPress}
               onSendMessage={handleSendMessage}
-              showHintButton={showHintButton}
-              onHintClick={handleHintClick}
-              sx={{
-                boxShadow: 6,
-                borderRadius: 2,
-                p: 0,
-                m: 2,
-                bgcolor: 'white',
-                minWidth: 340,
-                maxWidth: 400,
-                display: 'flex',
-                flexDirection: 'column',
-                height: 'calc(100% - 32px)'
-              }}
               header={{
                 icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
                 title: 'AI Help & Feedback',
@@ -325,11 +303,12 @@ const Problem = () => {
                   { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution.' }
                 ])
               }}
+              aria-label="AI Assistant Panel"
             />
           )}
         </Box>
 
-        <Modal open={openAIModal} onClose={() => setOpenAIModal(false)}>
+        <Modal open={openAIModal} onClose={() => setOpenAIModal(false)} aria-label="AI Assistant Modal">
           <Box
             sx={{
               position: 'absolute',
@@ -348,9 +327,10 @@ const Problem = () => {
               minWidth: { xs: '90vw', sm: 400 },
               minHeight: 400
             }}
+            aria-label="AI Assistant Modal Content"
           >
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <IconButton onClick={() => setOpenAIModal(false)}>
+              <IconButton onClick={() => setOpenAIModal(false)} aria-label="Close AI Assistant Modal">
                 <CloseIcon />
               </IconButton>
             </Box>
@@ -360,8 +340,15 @@ const Problem = () => {
               onMessageChange={handleMessageChange}
               onKeyPress={handleKeyPress}
               onSendMessage={handleSendMessage}
-              showHintButton={showHintButton}
-              onHintClick={handleHintClick}
+              header={{
+                icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
+                title: 'AI Help & Feedback',
+                onClose: () => setOpenAIModal(false),
+                onClearChat: () => setChatMessages([
+                  { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution.' }
+                ])
+              }}
+              aria-label="AI Assistant Panel in Modal"
             />
           </Box>
         </Modal>

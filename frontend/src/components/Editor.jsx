@@ -7,7 +7,6 @@ import ErrorBoundary from './ErrorBoundary';
 const CodeEditor = ({ 
   value, 
   onChange, 
-  height = '70vh',
   readOnly = false,
   language = 'python'
 }) => {
@@ -59,13 +58,17 @@ const CodeEditor = ({
     <ErrorBoundary>
       <Box sx={{ 
         width: '100%',
-        height,
+        height: '100%',
+        minHeight: 0,
+        flex: 2,
         bgcolor: '#1e1e1e',
         borderRadius: '4px',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column'
-      }}>
+      }}
+      aria-label="Code Editor Container"
+      >
         {editorError && (
           <Alert 
             severity="error" 
@@ -93,6 +96,7 @@ const CodeEditor = ({
                 height: '100%',
                 bgcolor: '#1e1e1e'
               }}
+              aria-label="Loading code editor"
             >
               <CircularProgress />
             </Box>
@@ -109,6 +113,7 @@ const CodeEditor = ({
             detectIndentation: true,
             wordWrap: 'on'
           }}
+          aria-label="Monaco Code Editor"
         />
       </Box>
     </ErrorBoundary>
@@ -118,7 +123,6 @@ const CodeEditor = ({
 CodeEditor.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
-  height: PropTypes.string,
   readOnly: PropTypes.bool,
   language: PropTypes.string
 };
