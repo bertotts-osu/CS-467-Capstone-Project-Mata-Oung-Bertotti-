@@ -83,46 +83,53 @@ const Problem = () => {
     setMessage(event.target.value);
   };
 
-  const sendMessageToGPT = async (messages) => {
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ messages }),
-        });
+  const sendMessageToGPT = async ({ user_request, submission = "no", hint = "no" }) => {
+  try {
+    const payload = {
+      problem_type: location.state?.pattern || 'fibonacci',
+      difficulty: location.state?.difficulty || 'Easy',
+      user_request,
+      submission,
+      hint,
+      code,  // This comes from the editor
+    };
 
-        if (!response.ok) {
-          throw new Error('Failed to get AI response.');
-        }
+    const response = await fetch('http://localhost:5000/api/problem-chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
 
-        const data = await response.json();
-        return data.reply;
-      } catch (error) {
-        console.error('Error communicating with GPT API:', error);
-        return 'Sorry, there was an error trying to help with your solution.';
-      }
-  };
+    if (!response.ok) {
+      throw new Error('Failed to get AI response.');
+    }
+
+    const data = await response.json();
+    return data.response;
+
+  } catch (error) {
+    console.error('Error communicating with GPT API:', error);
+    return 'Sorry, there was an error trying to help with your solution.';
+  }
+};
 
   const handleSendMessage = useCallback(async () => {
   if (message.trim()) {
-    try {
-      const newUserMessage = { role: 'user', content: message };
-      const updatedMessages = [...chatMessages, newUserMessage];
+    const newUserMessage = { role: 'user', content: message };
+    setChatMessages(prev => [...prev, newUserMessage]);
+    setMessage('');
 
-      setChatMessages(updatedMessages);
-      setMessage('');
+    const assistantReply = await sendMessageToGPT({
+      user_request: message,
+      submission: "no",
+      hint: "no",
+    });
 
-      const assistantReply = await sendMessageToGPT(updatedMessages);
-
-      setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
-    } catch (error) {
-      console.error('Chat error:', error);
-      setError('Failed to send message. Please try again.');
-    }
+    setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
   }
-}, [message, chatMessages]);
+}, [message, code]);
 
   const handleKeyPress = useCallback((event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -150,16 +157,19 @@ const Problem = () => {
     }
   }, [code, language]);
 
-  const handleHintClick = useCallback(() => {
-    setChatMessages(prev => [...prev, { role: 'user', content: 'Can I have a hint?' }]);
-    setShowHintButton(false);
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'I\'m analyzing your code to provide better assistance...'
-      }]);
-    }, 1000);
-  }, []);
+  const handleHintClick = useCallback(async () => {
+  const hintRequest = 'Can I have a hint?';
+  setChatMessages(prev => [...prev, { role: 'user', content: hintRequest }]);
+  setShowHintButton(false);
+
+  const assistantReply = await sendMessageToGPT({
+    user_request: hintRequest,
+    submission: "no",
+    hint: "yes",
+  });
+
+  setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+}, [code]);
 
   useEffect(() => {
     async function loadProblem() {
@@ -238,16 +248,27 @@ const Problem = () => {
 
           {/* Code Editor Section - Middle */}
           <CodeEditorPanel
-            code={code}
-            onCodeChange={handleCodeChange}
-            language={language}
-            onLanguageChange={handleLanguageChange}
-            onRun={handleRun}
-            onSubmit={() => {}}
-            consoleTab={consoleTab}
-            onConsoleTabChange={handleConsoleTabChange}
-            consoleOutput={consoleOutput}
-          />
+              code={code}
+              onCodeChange={setCode}
+              language={language}
+              onLanguageChange={setLanguage}
+              onRun={handleRun}
+              onSubmit={async () => {
+                const submitRequest = 'Please review my submission.';
+                setChatMessages(prev => [...prev, { role: 'user', content: submitRequest }]);
+
+                const assistantReply = await sendMessageToGPT({
+                  user_request: submitRequest,
+                  submission: "yes",
+                  hint: "no",
+                });
+
+                setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
+              }}
+              consoleTab={consoleTab}
+              onConsoleTabChange={setConsoleTab}
+              consoleOutput={consoleOutput}
+            />
 
           {/* AI Assistant - Right Side */}
           <AIAssistantPanel

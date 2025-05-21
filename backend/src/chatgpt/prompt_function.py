@@ -25,7 +25,7 @@ def build_gpt_prompt(data):
 
 # Instructions
 
-def gtp_instructions(problem_type, difficulty):
+def build_gpt_instructions(problem_type, difficulty):
     instructions = f"""
     You are an AI tutor helping a user practice coding problems based on algorithm patterns.
     The user has selected the following problem category:
@@ -52,7 +52,7 @@ def gtp_instructions(problem_type, difficulty):
 
 # User Interaction
 
-def user_instructions(settings):
+def build_user_prompt(settings):
     messages = []
 
     if settings.get("hint") == "yes":
@@ -69,10 +69,3 @@ def user_instructions(settings):
         messages.append(settings["user_request"])
 
     return "\n\n".join(messages)
-
-
-
-
-
-
-

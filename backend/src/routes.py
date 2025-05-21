@@ -9,12 +9,12 @@ from functools import wraps
 import subprocess
 import tempfile
 import os
+from .chatgpt.api import chatgpt_bp
 
 AUTH = "/auth"
 PROBLEMS = "/problems"
 USERS = "/users"
 ATTEMPTS = "/attempts"
-
 
 def register_routes(app):
     @app.route("/")
@@ -203,6 +203,8 @@ def register_routes(app):
         except Exception as e:
             print("GPT API error:", str(e))
             return {"error": "GPT API failed", "details": str(e)}, 500
+
+    app.register_blueprint(chatgpt_bp)
 
 def require_auth(route):
     @wraps(route)

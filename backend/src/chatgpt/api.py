@@ -1,6 +1,9 @@
 import os
 import requests
+import traceback
 from dotenv import load_dotenv
+from flask import Blueprint, request, jsonify
+from .prompt_function import build_gpt_instructions, build_user_prompt
 
 load_dotenv()
 
@@ -10,11 +13,24 @@ AZURE_DEPLOYMENT_NAME = os.getenv("AZURE_DEPLOYMENT_NAME")  # e.g. CS467-gpt-4o
 AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")          # e.g. 2024-11-20
 
 def ask_gpt(messages):
-    url = f"{AZURE_OPENAI_ENDPOINT}openai/deployments/{AZURE_DEPLOYMENT_NAME}/chat/completions?api-version={AZURE_API_VERSION}"
+    endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "").rstrip("/")
+    deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+    api_version = os.getenv("AZURE_OPENAI_API_VERSION")
+    api_key = os.getenv("AZURE_OPENAI_KEY")
+
+    print("[ENV DEBUG] endpoint:", endpoint)
+    print("[ENV DEBUG] deployment:", deployment)
+    print("[ENV DEBUG] api_version:", api_version)
+    print("[ENV DEBUG] api_key:", "SET" if api_key else "MISSING")
+
+    if not all([endpoint, deployment, api_version, api_key]):
+        raise ValueError("Missing one or more Azure OpenAI environment variables.")
+
+    url = f"{endpoint}/openai/deployments/{deployment}/chat/completions?api-version={api_version}"
 
     headers = {
         "Content-Type": "application/json",
-        "api-key": AZURE_OPENAI_KEY
+        "api-key": api_key
     }
 
     payload = {
@@ -34,6 +50,7 @@ def ask_gpt(messages):
 
     return response.json()["choices"][0]["message"]["content"]
 
+
 # Example test call
 if __name__ == "__main__":
     message_log = [
@@ -42,3 +59,36 @@ if __name__ == "__main__":
     ]
     reply = ask_gpt(message_log)
     print("GPT Response:", reply)
+
+chatgpt_bp = Blueprint("chatgpt", __name__)
+
+import traceback  # at the top if not already imported
+
+@chatgpt_bp.route("/api/problem-chat", methods=["POST"])
+def problem_chat():
+    try:
+        data = request.json
+        problem_type = data.get("problem_type")
+        difficulty = data.get("difficulty")
+        print("[DEBUG] Incoming data:", data)
+
+        system_prompt = build_gpt_instructions(problem_type, difficulty)
+        user_prompt = build_user_prompt(data)
+
+        print("[DEBUG] System Prompt:", system_prompt)
+        print("[DEBUG] User Prompt:", user_prompt)
+
+        message_log = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+
+        reply = ask_gpt(message_log)
+
+        return jsonify({"response": reply})
+
+    except Exception as e:
+        print("[ERROR]", e)
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
