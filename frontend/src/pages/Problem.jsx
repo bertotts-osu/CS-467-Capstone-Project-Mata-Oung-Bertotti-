@@ -114,10 +114,11 @@ const Problem = () => {
       messages: updatedMessages,
       problem: problem?.prompt || '',
       code: code || '',
+      console_output: consoleOutput || '',
     });
 
     setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
-  }, [message, chatMessages, problem, code]);
+  }, [message, chatMessages, problem, code, consoleOutput]);
 
   const handleKeyPress = useCallback((event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -278,6 +279,7 @@ const Problem = () => {
               onCodeChange={handleCodeChange}
               language={language}
               onLanguageChange={handleLanguageChange}
+              onRun={handleRun}
               onSubmit={handleSubmit}
               consoleTab={consoleTab}
               onConsoleTabChange={handleConsoleTabChange}
