@@ -17,7 +17,9 @@ import {
   Snackbar,
   Modal,
   Fab,
-  Tooltip
+  Tooltip,
+  AppBar,
+  Toolbar
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -30,10 +32,12 @@ import { executeCode, fetchProblem } from '../http_requests/ProblemAPIs';
 import ProblemDescription from '../components/ProblemDescription';
 import CodeEditorPanel from '../components/CodeEditorPanel';
 import AIAssistantPanel from '../components/AIAssistantPanel';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { devMode } from "../config";
 import { sendMessageToGPT } from '../http_requests/ChatGptAPI';
 import FeedbackIcon from '@mui/icons-material/Feedback';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import Navbar from '../components/Navbar';
 
 const Problem = () => {
   const [code, setCode] = useState('def solution(nums):\n    # Write your solution here\n    pass');
@@ -54,6 +58,8 @@ const Problem = () => {
   const [showHintButton, setShowHintButton] = useState(true);
   const location = useLocation();
   const [openAIModal, setOpenAIModal] = useState(false);
+  const [aiPanelOpen, setAIPanelOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleCodeChange = useCallback((newValue) => {
     try {
@@ -171,14 +177,32 @@ const Problem = () => {
   setChatMessages(prev => [...prev, { role: 'assistant', content: assistantReply }]);
 }, [code]);
 
+  const handleSubmit = useCallback(async () => {
+    try {
+      setConsoleOutput('Submitting code...');
+      setConsoleTab(0);
+      const response = await executeCode({ code, language, input: '' });
+      const { output, error, success } = response.data;
+      let resultMsg = '';
+      if (success) {
+        resultMsg = `Output:\n${output}`;
+      } else {
+        resultMsg = `Error:\n${error || 'Unknown error.'}`;
+      }
+      setConsoleOutput(resultMsg);
+    } catch (error) {
+      setConsoleOutput('Error submitting code.');
+    }
+  }, [code, language]);
+
   useEffect(() => {
     async function loadProblem() {
       setLoading(true);
       setError(null);
       try {
-        // Use pattern/difficulty from navigation state, fallback to defaults
-        const pattern = location.state?.pattern || 'fibonacci';
-        const difficulty = location.state?.difficulty || 'Easy';
+        // Set default pattern and difficulty to Sliding Window and Medium
+        const pattern = location.state?.pattern || 'Sliding Window';
+        const difficulty = location.state?.difficulty || 'Medium';
         const response = await fetchProblem({ pattern, difficulty });
         setProblem(response.data);
       } catch (err) {
@@ -192,6 +216,8 @@ const Problem = () => {
 
   return (
     <ErrorBoundary>
+      {/* Navigation Bar */}
+      <Navbar />
       <Box
         sx={{
           width: '100vw',
@@ -201,9 +227,6 @@ const Problem = () => {
           flexDirection: 'column'
         }}
       >
-        {/* Navbar placeholder - height matches Layout's navbar */}
-        <Box sx={{ height: '64px', bgcolor: 'primary.main' }} />
-
         {/* Dev Mode Banner */}
         {devMode && (
           <Box
@@ -240,7 +263,12 @@ const Problem = () => {
           sx={{
             flex: 1,
             display: 'flex',
-            overflow: 'hidden'
+            flexDirection: 'row',
+            overflow: 'hidden',
+            justifyContent: aiPanelOpen ? 'flex-start' : 'center',
+            alignItems: aiPanelOpen ? 'stretch' : 'center',
+            minHeight: 0,
+            transition: 'all 0.3s',
           }}
         >
           {/* Problem Description - Left Side */}
@@ -291,11 +319,16 @@ const Problem = () => {
               flexDirection: 'column',
               height: 'calc(100% - 32px)'
             }}
-            header={{
-              icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
-              title: 'AI Help & Feedback'
-            }}
-          />
+              header={{
+                icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
+                title: 'AI Help & Feedback',
+                onClose: () => setAIPanelOpen(false),
+                onClearChat: () => setChatMessages([
+                  { role: 'assistant', content: 'Hi there! I\'m here to help you with your solution.' }
+                ])
+              }}
+            />
+          )}
         </Box>
 
         <Modal open={openAIModal} onClose={() => setOpenAIModal(false)}>

@@ -11,16 +11,30 @@ const CodeEditorPanel = ({
   onSubmit,
   consoleTab,
   onConsoleTabChange,
-  consoleOutput
+  consoleOutput,
+  setAIPanelOpen
 }) => (
   <Box sx={{ 
-    width: '50%',
+    width: '100%',
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
     borderLeft: '1px solid #333',
     borderRight: '1px solid #333'
   }}>
+    {/* Hint Button */}
+    {setAIPanelOpen && (
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1, pt: 2 }}>
+        <Button
+          variant="outlined"
+          color="info"
+          onClick={() => setAIPanelOpen(true)}
+          sx={{ mb: 1 }}
+        >
+          Can I have a hint?
+        </Button>
+      </Box>
+    )}
     {/* Language Selector and Buttons */}
     <Box sx={{ 
       display: 'flex',
@@ -48,15 +62,9 @@ const CodeEditorPanel = ({
           }}
         >
           <MenuItem value="python">Python</MenuItem>
-          <MenuItem value="javascript">JavaScript</MenuItem>
-          <MenuItem value="java">Java</MenuItem>
-          <MenuItem value="cpp">C++</MenuItem>
         </Select>
       </FormControl>
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <Button variant="contained" color="primary" onClick={onRun}>
-          Run
-        </Button>
         <Button variant="contained" color="success" onClick={onSubmit}>
           Submit
         </Button>

@@ -10,7 +10,8 @@ load_dotenv()
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")  # e.g. https://cs467-chatgpt-api-challenge.openai.azure.com/
 AZURE_DEPLOYMENT_NAME = os.getenv("AZURE_DEPLOYMENT_NAME")  # e.g. CS467-gpt-4o
-AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")          # e.g. 2024-11-20
+AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")  # e.g. 2024-11-20
+
 
 def ask_gpt(messages):
     endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "").rstrip("/")
