@@ -427,7 +427,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import CloseIcon from "@mui/icons-material/Close";
 import FeedbackIcon from "@mui/icons-material/Feedback";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { executeCode, fetchProblem } from "../http_requests/ProblemAPIs";
@@ -438,6 +438,9 @@ import Navbar from "../components/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { devMode } from "../config";
 import { sendMessageToGPT } from "../http_requests/ChatGptAPI";
+import { red } from "@mui/material/colors";
+import CircularProgress from "@mui/material/CircularProgress";
+import logo from "../assets/logo.png";
 
 const Problem = () => {
   const [code, setCode] = useState();
@@ -447,7 +450,7 @@ const Problem = () => {
   const [chatMessages, setChatMessages] = useState([
     {
       role: "assistant",
-      content: "Hi there! I'm here to help you with your solution.",
+      content: "Hi there! Let me know how I can help.",
     },
   ]);
   const [error, setError] = useState(null);
@@ -460,6 +463,8 @@ const Problem = () => {
   const [passFailStatus, setPassFailStatus] = useState(null);
   const [testResultDetails, setTestResultDetails] = useState([]);
   const [hideRawConsole, setHideRawConsole] = useState(false);
+  const [showHoverText, setShowHoverText] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCodeChange = useCallback((newValue) => {
     if (!newValue) return;
@@ -532,10 +537,12 @@ const Problem = () => {
 
   const handleSubmit = useCallback(async () => {
     try {
+      setIsSubmitting(true); // 👈 Show full-screen loader
       setConsoleOutput("Submitting code...");
       setConsoleTab(0);
       const response = await executeCode({ code });
 
+      // Existing result handling...
       if ("result" in response.data) {
         const overallResult = response.data.result;
         setPassFailStatus(overallResult ? "pass" : "fail");
@@ -554,10 +561,8 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
           overallResult ? "Passed" : "Failed"
         }\n\n${testCaseDetails}`;
 
-        // Embed test case results inside console output instead of separate TestCaseResults
         setConsoleOutput(resultMsg);
       } else {
-        // Fallback: simple output/error response
         const { output, error, success } = response.data;
         setConsoleOutput(
           success
@@ -570,6 +575,8 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
       console.error("Submit error:", error);
       setConsoleOutput("Error submitting code.");
       setPassFailStatus("fail");
+    } finally {
+      setIsSubmitting(false); // 👈 Hide full-screen loader
     }
   }, [code]);
 
@@ -581,6 +588,16 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
         const pattern = location.state?.pattern || "Sliding Window";
         const difficulty = location.state?.difficulty || "Medium";
         const response = await fetchProblem({ pattern, difficulty });
+
+        // Check if the response indicates an authentication error
+        if (
+          response.status === 401 ||
+          response.data?.error === "Invalid token"
+        ) {
+          navigate("/login"); // Redirect to login
+          return;
+        }
+
         setProblem(response.data);
 
         if (response.data.attempt_id) {
@@ -593,7 +610,7 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
       }
     }
     loadProblem();
-  }, [location.state]);
+  }, [location.state, navigate]); // Add `navigate` to dependency array
 
   return (
     <ErrorBoundary>
@@ -642,6 +659,7 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
         </Snackbar>
 
         {/* Main Content Area: Vertical Layout */}
+
         <Box
           sx={{
             flex: 1,
@@ -654,56 +672,110 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
             marginTop: "30px",
             borderLeft: "6px solid #1976d2",
             borderRadius: 0,
+            height: "100%",
           }}
           aria-label="Problem Page Main Content"
         >
-          {/* Problem Description Area (with examples and test cases) */}
-          <Box aria-label="Problem Description Area">
-            <ProblemDescription problem={problem} loading={loading} />
-            {consoleOutput && !hideRawConsole && (
-              <Box>
-                <TestCaseResults
-                  resultDetails={testResultDetails}
-                  overallResult={passFailStatus === "pass"}
+          {loading ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Box
+              sx={{ display: "flex", flexDirection: "column", maxWidth: "85%" }}
+            >
+              {/* Problem Description Area (with examples and test cases) */}
+              <Box aria-label="Problem Description Area">
+                <ProblemDescription problem={problem} loading={loading} />
+                {consoleOutput && !hideRawConsole && (
+                  <Box>
+                    <TestCaseResults
+                      resultDetails={testResultDetails}
+                      overallResult={passFailStatus === "pass"}
+                    />
+                  </Box>
+                )}
+              </Box>
+
+              {/* Code Editor Section */}
+              <Box
+                sx={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflow: "hidden",
+                }}
+                aria-label="Code Editor Section"
+              >
+                <CodeEditorPanel
+                  code={code}
+                  onCodeChange={handleCodeChange}
+                  onSubmit={handleSubmit}
+                  consoleTab={consoleTab}
+                  onConsoleTabChange={handleConsoleTabChange}
+                  consoleOutput={consoleOutput}
+                  passFailStatus={passFailStatus}
                 />
               </Box>
-            )}
-          </Box>
-
-          {/* Code Editor Section */}
-          <Box
-            sx={{
-              flex: 1,
-              minHeight: 0,
-              overflow: "hidden",
-            }}
-            aria-label="Code Editor Section"
-          >
-            <CodeEditorPanel
-              code={code}
-              onCodeChange={handleCodeChange}
-              onSubmit={handleSubmit}
-              consoleTab={consoleTab}
-              onConsoleTabChange={handleConsoleTabChange}
-              consoleOutput={consoleOutput}
-              passFailStatus={passFailStatus}
-            />
-          </Box>
+            </Box>
+          )}
         </Box>
 
         {/* Floating Action Button for the Chat Modal */}
-        <Fab
-          onClick={() => setOpenAIModal(true)}
-          aria-label="Open Chat Modal"
-          sx={{
-            position: "fixed",
-            bottom: 16,
-            right: 16,
-            zIndex: 1000,
-          }}
-        >
-          <HelpOutlineIcon />
-        </Fab>
+        {!openAIModal && (
+          <>
+            <Fab
+              onClick={() => setOpenAIModal(true)}
+              aria-label="Open Chat Modal"
+              sx={{
+                position: "fixed",
+                bottom: 75, // moved up slightly to make room for tooltip
+                right: 75,
+                zIndex: 1000,
+                width: "85px",
+                height: "85px",
+                display: "flex",
+                flexDirection: "column",
+                fontSize: 12,
+                bgcolor: "#1976D2",
+                color: "#fafafa",
+                "&:hover": {
+                  bgcolor: "#004BA0",
+                },
+              }}
+              onMouseEnter={() => setShowHoverText(true)}
+              onMouseLeave={() => setShowHoverText(false)}
+            >
+              <img
+                src={logo}
+                alt="AI Algorithm Mentor Logo"
+                style={{ height: "85px", verticalAlign: "middle" }}
+              />
+            </Fab>
+
+            <div
+              style={{
+                position: "fixed",
+                bottom: 47,
+                right: 75,
+                width: "85px",
+                textAlign: "center",
+                color: "#004BA0",
+                fontSize: "14px",
+                zIndex: 1001,
+                fontWeight: "bold",
+              }}
+            >
+              AI Mentor
+            </div>
+          </>
+        )}
 
         {/* AI Chat Modal */}
         <Modal
@@ -713,59 +785,65 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
           aria-labelledby="ai-assistant-modal-title"
           aria-describedby="ai-assistant-modal-description"
           sx={{
-            pointerEvents: "none", // prevents the full-screen wrapper from blocking interaction
+            pointerEvents: "auto", // prevents the full-screen wrapper from blocking interaction
+            border: "1.25px solid #ccc",
+            overflow: "hidden",
           }}
         >
-          <Box
-            sx={{
-              position: "fixed",
-              bottom: 20,
-              right: 20,
-              width: 350,
-              height: "80vh",
-              bgcolor: "background.paper",
-              boxShadow: 4,
-              p: 2,
-              overflowY: "auto",
-              borderRadius: 2,
-              zIndex: 1300,
-              pointerEvents: "auto", // allows interaction inside the box
+          <AIAssistantPanel
+            onClick={() => setOpenAIModal(false)}
+            chatMessages={chatMessages}
+            message={message}
+            onMessageChange={handleMessageChange}
+            onKeyPress={handleKeyPress}
+            onSendMessage={handleSendMessage}
+            header={{
+              icon: (
+                <img
+                  src={logo}
+                  alt="AI Mentor Logo"
+                  style={{ height: "35px", verticalAlign: "middle" }}
+                />
+              ),
+              title: "AI Mentor",
+              onClose: () => setOpenAIModal(false),
+              onClearChat: () =>
+                setChatMessages([
+                  {
+                    role: "assistant",
+                    content: "Hi there! Let me know how I can help.",
+                  },
+                ]),
             }}
-            aria-label="AI Assistant Chat Panel"
-          >
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <IconButton
-                onClick={() => setOpenAIModal(false)}
-                aria-label="Close Chat Modal"
-              >
-                <CloseIcon />
-              </IconButton>
-            </Box>
-
-            <AIAssistantPanel
-              chatMessages={chatMessages}
-              message={message}
-              onMessageChange={handleMessageChange}
-              onKeyPress={handleKeyPress}
-              onSendMessage={handleSendMessage}
-              header={{
-                icon: <FeedbackIcon color="primary" sx={{ mr: 1 }} />,
-                title: "AI Help & Feedback",
-                onClose: () => setOpenAIModal(false),
-                onClearChat: () =>
-                  setChatMessages([
-                    {
-                      role: "assistant",
-                      content:
-                        "Hi there! I'm here to help you with your solution.",
-                    },
-                  ]),
-              }}
-              aria-label="AI Assistant Panel in Modal"
-            />
-          </Box>
+            aria-label="AI Assistant Panel in Modal"
+          />
+          {/* </Box> */}
         </Modal>
       </Box>
+      {/* Full-Screen Submitting Modal */}
+      <Modal
+        open={isSubmitting}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
+          zIndex: 2000,
+          flexDirection: "column",
+        }}
+        aria-labelledby="submission-loading"
+        aria-describedby="submission-in-progress"
+      >
+        <>
+          <CircularProgress size={80} thickness={5} sx={{ color: "#ffffff" }} />
+          <Typography
+            variant="h6"
+            sx={{ color: "#ffffff", mt: 2, fontWeight: "bold" }}
+          >
+            Submitting...
+          </Typography>
+        </>
+      </Modal>
     </ErrorBoundary>
   );
 };

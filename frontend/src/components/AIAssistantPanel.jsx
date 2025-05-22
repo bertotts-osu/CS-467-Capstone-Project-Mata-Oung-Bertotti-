@@ -1,32 +1,40 @@
-import React, { useRef, useEffect } from 'react';
-import { Box, Paper, Typography, TextField, IconButton, Divider, Tooltip, Fade } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import FeedbackIcon from '@mui/icons-material/Feedback';
-import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import React, { useEffect, useRef } from "react";
+import {
+  Box,
+  Paper,
+  Typography,
+  IconButton,
+  Divider,
+  TextField,
+  Tooltip,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import SendIcon from "@mui/icons-material/Send";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const AIAssistantPanel = ({
+  onClick,
   chatMessages,
   message,
   onMessageChange,
   onKeyPress,
   onSendMessage,
-  header
+  header,
 }) => {
   const chatEndRef = useRef(null);
 
-  // Auto-scroll to latest message
+  // Auto-scroll to the latest message when chatMessages change.
   useEffect(() => {
     if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatMessages]);
 
   const handleClearChat = () => {
-    if (typeof header?.onClearChat === 'function') {
+    if (typeof header?.onClearChat === "function") {
       header.onClearChat();
     }
   };
@@ -34,83 +42,95 @@ const AIAssistantPanel = ({
   return (
     <Box
       component={Paper}
-      elevation={4}
+      elevation={3}
       sx={{
-        width: '100%',
-        minWidth: 400,
+        width: "max-content",
         maxWidth: 600,
-        height: '100%',
         minHeight: 500,
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: 2,
-        boxShadow: 4,
-        bgcolor: '#fff',
-        minHeight: 0,
-        overflow: 'hidden',
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "#fff",
+        borderRadius: 0, // Remove border-radius for a unified look.
         m: 0,
-        p: 2,
+        p: 0,
+        position: "fixed",
+        bottom: 20,
+        right: 5,
+        height: "maxContent",
+        maxHeight: "80vh",
       }}
-      aria-label="AI Assistant Chat Panel"
+      aria-label="AI Algorithm Mentor"
     >
-      {/* Sticky Header */}
-      <Box sx={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 2,
-        display: 'flex',
-        alignItems: 'center',
-        bgcolor: '#e3f2fd',
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        p: 1.2,
-        borderBottom: '1.5px solid #bbdefb',
-        gap: 1,
-        boxShadow: '0 2px 8px 0 rgba(33, 150, 243, 0.07)',
-        minHeight: 56,
-      }}>
-        {header?.icon}
-        <Typography variant="h6" fontWeight={700} sx={{ flex: 1, fontSize: 20, color: '#1976d2' }}>
-          {header?.title || 'AI Help & Feedback'}
+      {/* Header */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          bgcolor: "#e0e0e0",
+          p: 1,
+        }}
+      >
+        {header?.icon && (
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            {header.icon}
+          </Box>
+        )}
+        <Typography
+          variant="h6"
+          fontWeight={700}
+          sx={{ flex: 1, ml: header?.icon ? 1 : 0 }}
+        >
+          {header?.title || "AI Algorithm Mentor"}
         </Typography>
         {header?.onClearChat && (
           <Tooltip title="Clear Chat">
-            <IconButton size="small" onClick={handleClearChat} sx={{ mr: 0.5 }} aria-label="Clear chat">
+            <IconButton
+              size="small"
+              onClick={handleClearChat}
+              aria-label="Clear chat"
+            >
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Tooltip>
         )}
         {header?.onClose && (
-          <IconButton size="small" onClick={header.onClose} aria-label="Close panel">
+          <IconButton
+            size="small"
+            onClick={header.onClose}
+            aria-label="Close panel"
+          >
             <CloseIcon fontSize="small" />
           </IconButton>
         )}
       </Box>
+
       <Divider sx={{ m: 0 }} />
-      {/* Chat Messages */}
-      <Box sx={{ flex: 1, overflowY: 'auto', minHeight: 0, pb: 1 }}>
+
+      {/* Chat Messages Area */}
+      <Box sx={{ flex: 1, overflowY: "auto", p: 2 }}>
         {chatMessages.map((msg, idx) => (
           <Box
             key={idx}
             sx={{
-              maxWidth: '90%',
+              // maxWidth: "100%",
               mb: 1.5,
-              alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-              bgcolor: msg.role === 'user' ? 'primary.light' : 'grey.100',
-              color: msg.role === 'user' ? 'white' : 'text.primary',
-              borderRadius: 2,
+              alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+              bgcolor: msg.role === "user" ? "primary.light" : "grey.100",
+              color: msg.role === "user" ? "white" : "text.primary",
               px: 2,
-              py: 1,
+              py: .5,
               boxShadow: 1,
-              wordBreak: 'break-word',
-              overflowWrap: 'anywhere',
-              fontSize: 17,
+              wordBreak: "break-word",
+              overflowWrap: "anywhere",
+              fontSize: 14,
+              maxWidth: "max-content"
             }}
           >
             <ReactMarkdown
               components={{
                 code({ node, inline, className, children, ...props }) {
-                  const match = /language-(\w+)/.exec(className || '');
+                  const match = /language-(\w+)/.exec(className || "");
                   return !inline && match ? (
                     <SyntaxHighlighter
                       style={materialDark}
@@ -118,14 +138,14 @@ const AIAssistantPanel = ({
                       PreTag="div"
                       {...props}
                     >
-                      {String(children).replace(/\n$/, '')}
+                      {String(children).replace(/\n$/, "")}
                     </SyntaxHighlighter>
                   ) : (
                     <code className={className} {...props}>
                       {children}
                     </code>
                   );
-                }
+                },
               }}
             >
               {msg.content}
@@ -134,32 +154,30 @@ const AIAssistantPanel = ({
         ))}
         <div ref={chatEndRef} />
       </Box>
-      <Divider sx={{ my: 0 }} />
+
       {/* Message Input */}
       <Box
         sx={{
-          display: 'flex',
+          display: "flex",
           gap: 2,
           p: 1,
-          bgcolor: '#f5f7fa',
-          borderBottomLeftRadius: 16,
-          borderBottomRightRadius: 16,
-          alignItems: 'center',
+          bgcolor: "#f5f7fa",
+          alignItems: "center",
+          borderTop: "1px solid #ccc",
         }}
       >
         <TextField
           fullWidth
           size="medium"
-          placeholder="Ask for help... (Shift+Enter for newline)"
+          placeholder="Ask your questions here..."
           value={message}
           onChange={onMessageChange}
           onKeyPress={onKeyPress}
           variant="outlined"
-          sx={{ bgcolor: 'white', borderRadius: 2, fontSize: 17, boxShadow: 0 }}
-          inputProps={{ style: { fontSize: 17 }, 'aria-label': 'Type your message' }}
+          sx={{ bgcolor: "white", fontSize: 14, boxShadow: 0 }}
           multiline
           minRows={1}
-          maxRows={4}
+          maxRows={3}
         />
         <Tooltip title="Send (Enter)">
           <span>
@@ -167,7 +185,7 @@ const AIAssistantPanel = ({
               color="primary"
               onClick={onSendMessage}
               disabled={!message.trim()}
-              sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: 1, ml: 0.5 }}
+              sx={{ bgcolor: "white", boxShadow: 1 }}
               aria-label="Send message"
             >
               <SendIcon />
@@ -179,4 +197,4 @@ const AIAssistantPanel = ({
   );
 };
 
-export default AIAssistantPanel; 
+export default AIAssistantPanel;

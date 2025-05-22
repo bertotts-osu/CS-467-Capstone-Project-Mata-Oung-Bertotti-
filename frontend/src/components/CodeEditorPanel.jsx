@@ -180,6 +180,7 @@ const CodeEditorPanel = ({
         boxShadow: "none",
         m: 0,
         p: 2,
+        height: "100%",
       }}
       elevation={4}
     >
@@ -202,7 +203,7 @@ const CodeEditorPanel = ({
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          width: "80%",
+          width: "95%",
           border: "2px solid #999",
           boxShadow: "none",
           minHeight: "250px"
@@ -263,12 +264,12 @@ const CodeEditorPanel = ({
           <Box
             sx={{
               height: editorHeight,
-              minHeight: 40,
               overflow: "hidden",
               bgcolor: "#181a1b",
               p: 0.5,
               display: "flex",
               flexDirection: "column",
+              minHeight: "300px"
             }}
           >
             <CodeEditor
@@ -293,6 +294,7 @@ const CodeEditorPanel = ({
           {/* Console/Output Area */}
           <Box
             sx={{
+              flex: 1,
               height: 200,
               borderTop: "1px solid #333",
               bgcolor: "#23272b",
@@ -329,6 +331,7 @@ const CodeEditorPanel = ({
                 fontSize: "0.85rem",
                 color: "white",
                 whiteSpace: "pre-wrap",
+                minHeight: "40px"
               }}
             >
               {consoleOutput}

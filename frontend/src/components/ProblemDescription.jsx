@@ -7,13 +7,13 @@ const ProblemDescription = ({ problem, loading, testCases }) => (
   <Paper
     elevation={4}
     sx={{
-      width: "100%",
+      width: "95%",
       height: "100%",
       display: "flex",
       flexDirection: "column",
       minHeight: 0,
       textWrap: "wrap",
-      p: 2,
+      pl: 2,
       m: 0,
       boxShadow: "none"
     }}
@@ -50,7 +50,7 @@ const ProblemDescription = ({ problem, loading, testCases }) => (
               borderLeft: "4px solid #1976d2",
             }}
           >
-            <Typography variant="subtitle2" color="text.secondary">
+            <Typography variant="h6" color="text.secondary">
               Example:
             </Typography>
             <Typography

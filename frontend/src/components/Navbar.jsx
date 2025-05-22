@@ -1,14 +1,28 @@
-import { AppBar, Toolbar, Typography, Button, Box, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+} from "@mui/material";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
-import MenuIcon from '@mui/icons-material/Menu';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ContactMailIcon from '@mui/icons-material/ContactMail';
-import LogoutIcon from '@mui/icons-material/Logout';
-import LoginIcon from '@mui/icons-material/Login';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import React, { useState } from 'react';
+import MenuIcon from "@mui/icons-material/Menu";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import ContactMailIcon from "@mui/icons-material/ContactMail";
+import LogoutIcon from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import React, { useState } from "react";
+import logo from "../assets/logo.png";
 
 export default function Navbar() {
   const isAuthenticated = !!localStorage.getItem("authToken");
@@ -23,43 +37,71 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { label: 'Dashboard', to: '/', icon: <DashboardIcon /> },
-    { label: 'Profile', to: '/profile', icon: <AccountCircleIcon /> },
-    { label: 'Contact', to: '/contact', icon: <ContactMailIcon /> },
+    { label: "Dashboard", to: "/", icon: <DashboardIcon /> },
+    { label: "Profile", to: "/profile", icon: <AccountCircleIcon /> },
+    { label: "Contact", to: "/contact", icon: <ContactMailIcon /> },
   ];
 
   return (
-    <AppBar position="static" color="primary" sx={{ width: '100%' }} aria-label="Main Navigation Bar">
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }} aria-label="Navigation Toolbar">
+    <AppBar
+      position="static"
+      color="primary"
+      sx={{ width: "100%", pr: "20px" }}
+      aria-label="Main Navigation Bar"
+    >
+      <Toolbar
+        sx={{ display: "flex", justifyContent: "space-between" }}
+        aria-label="Navigation Toolbar"
+      >
         {/* App Title */}
         <Typography
           variant="h6"
           component={RouterLink}
           to="/"
-          sx={{ textDecoration: "none", color: "inherit", fontWeight: 600 }}
-          aria-label="App Title: ChatGPT Challenge"
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            textDecoration: "none",
+            color: "inherit",
+            fontWeight: 600,
+            gap: "20px",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+          aria-label="App Title: AI Algorithm Mentor"
         >
-          ChatGPT Challenge
+          <img
+            src={logo}
+            alt="AI Algorithm Mentor Logo"
+            style={{ height: "50px", verticalAlign: "middle" }}
+          />
+          AI Algo Mentor
         </Typography>
 
         {/* Desktop Navigation Links */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }} aria-label="Desktop Navigation Links">
-          {navLinks.map(link => (
+        <Box
+          sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}
+          aria-label="Desktop Navigation Links"
+        >
+          {navLinks.map((link) => (
             <Button
               key={link.to}
-              color={location.pathname === link.to ? 'secondary' : 'inherit'}
+              color={location.pathname === link.to ? "secondary" : "inherit"}
               component={RouterLink}
               to={link.to}
               startIcon={link.icon}
               sx={{
                 fontWeight: location.pathname === link.to ? 700 : 400,
-                bgcolor: location.pathname === link.to ? 'rgba(255,255,255,0.08)' : 'transparent',
+                bgcolor:
+                  location.pathname === link.to
+                    ? "rgba(255,255,255,0.08)"
+                    : "transparent",
                 borderRadius: 2,
                 px: 2,
                 py: 1,
-                '&:hover': {
-                  bgcolor: 'rgba(255,255,255,0.15)'
-                }
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.15)",
+                },
               }}
               aria-label={`Navigate to ${link.label}`}
             >
@@ -67,11 +109,34 @@ export default function Navbar() {
             </Button>
           ))}
           {isAuthenticated ? (
-            <Button color="inherit" onClick={handleLogout} startIcon={<LogoutIcon />} aria-label="Logout">Logout</Button>
+            <Button
+              color="inherit"
+              onClick={handleLogout}
+              startIcon={<LogoutIcon />}
+              aria-label="Logout"
+            >
+              Logout
+            </Button>
           ) : (
             <>
-              <Button color="inherit" component={RouterLink} to="/login" startIcon={<LoginIcon />} aria-label="Login">Login</Button>
-              <Button color="inherit" component={RouterLink} to="/signup" startIcon={<PersonAddIcon />} aria-label="Sign Up">Sign Up</Button>
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/login"
+                startIcon={<LoginIcon />}
+                aria-label="Login"
+              >
+                Login
+              </Button>
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/signup"
+                startIcon={<PersonAddIcon />}
+                aria-label="Sign Up"
+              >
+                Sign Up
+              </Button>
             </>
           )}
         </Box>
@@ -80,7 +145,7 @@ export default function Navbar() {
         <IconButton
           color="inherit"
           edge="end"
-          sx={{ display: { xs: 'flex', md: 'none' } }}
+          sx={{ display: { xs: "flex", md: "none" } }}
           onClick={() => setDrawerOpen(true)}
           aria-label="Open mobile navigation menu"
         >
@@ -94,10 +159,21 @@ export default function Navbar() {
           onClose={() => setDrawerOpen(false)}
           aria-label="Mobile Navigation Drawer"
         >
-          <Box sx={{ width: 240 }} role="presentation" onClick={() => setDrawerOpen(false)}>
+          <Box
+            sx={{ width: 240 }}
+            role="presentation"
+            onClick={() => setDrawerOpen(false)}
+          >
             <List>
-              {navLinks.map(link => (
-                <ListItem button key={link.to} component={RouterLink} to={link.to} selected={location.pathname === link.to} aria-label={`Navigate to ${link.label}`}>
+              {navLinks.map((link) => (
+                <ListItem
+                  button
+                  key={link.to}
+                  component={RouterLink}
+                  to={link.to}
+                  selected={location.pathname === link.to}
+                  aria-label={`Navigate to ${link.label}`}
+                >
                   <ListItemIcon>{link.icon}</ListItemIcon>
                   <ListItemText primary={link.label} />
                 </ListItem>
@@ -107,17 +183,33 @@ export default function Navbar() {
             <List>
               {isAuthenticated ? (
                 <ListItem button onClick={handleLogout} aria-label="Logout">
-                  <ListItemIcon><LogoutIcon /></ListItemIcon>
+                  <ListItemIcon>
+                    <LogoutIcon />
+                  </ListItemIcon>
                   <ListItemText primary="Logout" />
                 </ListItem>
               ) : (
                 <>
-                  <ListItem button component={RouterLink} to="/login" aria-label="Login">
-                    <ListItemIcon><LoginIcon /></ListItemIcon>
+                  <ListItem
+                    button
+                    component={RouterLink}
+                    to="/login"
+                    aria-label="Login"
+                  >
+                    <ListItemIcon>
+                      <LoginIcon />
+                    </ListItemIcon>
                     <ListItemText primary="Login" />
                   </ListItem>
-                  <ListItem button component={RouterLink} to="/signup" aria-label="Sign Up">
-                    <ListItemIcon><PersonAddIcon /></ListItemIcon>
+                  <ListItem
+                    button
+                    component={RouterLink}
+                    to="/signup"
+                    aria-label="Sign Up"
+                  >
+                    <ListItemIcon>
+                      <PersonAddIcon />
+                    </ListItemIcon>
                     <ListItemText primary="Sign Up" />
                   </ListItem>
                 </>
