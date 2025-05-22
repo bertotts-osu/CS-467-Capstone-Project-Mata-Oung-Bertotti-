@@ -13,7 +13,7 @@ class AzureOpenAIClient:
     def send_request(self, messages, temperature=0.7, max_tokens=800, top_p=0.95,
                      frequency_penalty=0, presence_penalty=0, **kwargs):
 
-        url = f"{self.endpoint}openai/deployments/{self.deployment_name}/chat/completions?api-version={self.api_version}"
+        url = f"{self.endpoint}/openai/deployments/{self.deployment_name}/chat/completions?api-version={self.api_version}"
 
         headers = {
             "Content-Type": "application/json",
