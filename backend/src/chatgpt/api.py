@@ -65,6 +65,7 @@ chatgpt_bp = Blueprint("chatgpt", __name__)
 
 import traceback  # at the top if not already imported
 
+
 @chatgpt_bp.route("/api/problem-chat", methods=["POST"])
 def problem_chat():
     try:
@@ -92,4 +93,3 @@ def problem_chat():
         print("[ERROR]", e)
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
-
