@@ -4,6 +4,9 @@ import SendIcon from '@mui/icons-material/Send';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const AIAssistantPanel = ({
   chatMessages,
@@ -29,23 +32,24 @@ const AIAssistantPanel = ({
   };
 
   return (
-    <Paper
-      elevation={6}
+    <Box
+      component={Paper}
+      elevation={4}
       sx={{
-        width: { xs: '100vw', sm: 370, md: 400 },
-        minWidth: 280,
-        maxWidth: 400,
+        width: '100%',
+        minWidth: 400,
+        maxWidth: 600,
         height: '100%',
-        bgcolor: '#f9fafb',
-        borderRadius: 4,
+        minHeight: 500,
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: 6,
-        m: 0,
-        p: 2,
+        borderRadius: 2,
+        boxShadow: 4,
+        bgcolor: '#fff',
         minHeight: 0,
         overflow: 'hidden',
-        border: '1.5px solid #e3e8ef',
+        m: 0,
+        p: 2,
       }}
       aria-label="AI Assistant Chat Panel"
     >
@@ -84,47 +88,49 @@ const AIAssistantPanel = ({
       </Box>
       <Divider sx={{ m: 0 }} />
       {/* Chat Messages */}
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1.5,
-          px: 2,
-          py: 2,
-          bgcolor: '#f7fafd',
-          fontSize: '1.08rem',
-          position: 'relative',
-        }}
-        tabIndex={0}
-        aria-label="Chat messages"
-      >
-        {chatMessages.map((msg, index) => (
-          <Fade in key={index} timeout={400}>
-            <Box
-              sx={{
-                bgcolor: msg.role === 'assistant' ? 'linear-gradient(90deg, #e3f2fd 80%, #bbdefb 100%)' : 'linear-gradient(90deg, #f5f5f5 80%, #e0e0e0 100%)',
-                color: '#222',
-                p: 2,
-                borderRadius: 3,
-                boxShadow: msg.role === 'assistant' ? 2 : 1,
-                maxWidth: { xs: '95%', sm: '85%', md: '80%' },
-                alignSelf: msg.role === 'assistant' ? 'flex-start' : 'flex-end',
-                fontSize: '1.08rem',
-                mb: 0.5,
-                transition: 'background 0.3s',
-                border: msg.role === 'assistant' ? '1.5px solid #90caf9' : '1.5px solid #e0e0e0',
-                position: 'relative',
-                wordBreak: 'break-word',
+      <Box sx={{ flex: 1, overflowY: 'auto', minHeight: 0, pb: 1 }}>
+        {chatMessages.map((msg, idx) => (
+          <Box
+            key={idx}
+            sx={{
+              maxWidth: '90%',
+              mb: 1.5,
+              alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+              bgcolor: msg.role === 'user' ? 'primary.light' : 'grey.100',
+              color: msg.role === 'user' ? 'white' : 'text.primary',
+              borderRadius: 2,
+              px: 2,
+              py: 1,
+              boxShadow: 1,
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+              fontSize: 17,
+            }}
+          >
+            <ReactMarkdown
+              components={{
+                code({ node, inline, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || '');
+                  return !inline && match ? (
+                    <SyntaxHighlighter
+                      style={materialDark}
+                      language={match[1]}
+                      PreTag="div"
+                      {...props}
+                    >
+                      {String(children).replace(/\n$/, '')}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  );
+                }
               }}
             >
-              <Typography variant="body2" sx={{ whiteSpace: 'pre-line', fontSize: '1.08rem' }}>
-                {msg.content}
-              </Typography>
-            </Box>
-          </Fade>
+              {msg.content}
+            </ReactMarkdown>
+          </Box>
         ))}
         <div ref={chatEndRef} />
       </Box>
@@ -169,7 +175,7 @@ const AIAssistantPanel = ({
           </span>
         </Tooltip>
       </Box>
-    </Paper>
+    </Box>
   );
 };
 
