@@ -10,9 +10,6 @@ from src.exceptions import ProblemNotFound
 from src.services.test_runner import run_test_cases_against_solution
 from src.verify_token import verify_token
 from functools import wraps
-import subprocess
-import tempfile
-import os
 from .chatgpt.api import chatgpt_bp
 
 AUTH = "/auth"
@@ -20,8 +17,8 @@ PROBLEMS = "/problems"
 USERS = "/users"
 ATTEMPTS = "/attempts"
 
-def register_routes(app):
 
+def register_routes(app):
     @app.route('/users/<user_id>', methods=['GET'])
     def get_user(user_id):
         user = get_user_profile(user_id)
@@ -273,8 +270,8 @@ def register_routes(app):
         except Exception as e:
             print("GPT API error:", str(e))
             return {"error": "GPT API failed", "details": str(e)}, 500
-
     app.register_blueprint(chatgpt_bp)
+
 
 def require_auth(route):
     @wraps(route)
@@ -292,5 +289,4 @@ def require_auth(route):
             return {"error": "Invalid Token", "error_data": str(e)}, 403
 
         return route(*args, **kwargs)
-
     return decorated

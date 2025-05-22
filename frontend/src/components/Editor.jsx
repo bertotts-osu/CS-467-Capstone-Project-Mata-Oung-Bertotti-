@@ -52,7 +52,7 @@ const CodeEditor = ({
           borderRadius: "4px",
           overflow: "hidden",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "column"
         }}
         aria-label="Code Editor Container"
       >

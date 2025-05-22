@@ -20,6 +20,8 @@ def modify_problem(original_prompt, openAI_client):
              - "example": an object with "input" and "output" fields that illustrate the problem
           4. Do not wrap these in an additional field like "problem". Return only "prompt" and "example" as top-level keys.
           5. Do not include any explanation, summary, or additional commentary — only the JSON.
+          6. Please return the response as raw JSON only—do not wrap it in markdown code fences or add any 
+            explanations.
         """
     )
 
@@ -55,6 +57,8 @@ def generate_test_cases(prompt, openAI_client):
             4. The assignments must use only simple data types: lists, integers, floats, strings, booleans, or None.
             5. Return ONLY a raw JSON list of 3 test cases — no explanation, no extra text, no markdown.
             6. Do NOT return named variables for the input, just the raw value. For example DO NOT DO THIS, 'arr = [42]'
+            7. Please return the response as raw JSON only—do not wrap it in markdown code fences or add any 
+            explanations.
         """
     )
 

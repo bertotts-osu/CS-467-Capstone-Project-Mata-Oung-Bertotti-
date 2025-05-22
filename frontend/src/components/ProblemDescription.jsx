@@ -9,29 +9,24 @@ const ProblemDescription = ({ problem, loading, testCases }) => (
     sx={{
       width: "100%",
       height: "100%",
-      bgcolor: "#fff",
-      borderRadius: 2,
       display: "flex",
       flexDirection: "column",
-      boxShadow: 4,
-      borderLeft: "6px solid #1976d2",
       minHeight: 0,
-      overflow: "hidden",
+      textWrap: "wrap",
       p: 2,
-      m: 0
+      m: 0,
+      boxShadow: "none"
     }}
   >
-    <Typography variant="h4" fontWeight={700} gutterBottom>
-      Problem Description
-    </Typography>
-    <Divider sx={{ mb: 2 }} />
-    <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+    <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
       {loading && (
-        <Typography variant="body1" fontSize={18}>Loading...</Typography>
+        <Typography variant="body1" fontSize={18}>
+          Loading...
+        </Typography>
       )}
       {!loading && problem && (
         <>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
             {problem.name}
           </Typography>
           <Typography
@@ -41,6 +36,7 @@ const ProblemDescription = ({ problem, loading, testCases }) => (
               fontSize: "1.1rem",
               color: "text.primary",
               lineHeight: 1.7,
+              maxWidth: "90%"
             }}
           >
             {problem.prompt}
