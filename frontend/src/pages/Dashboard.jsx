@@ -26,7 +26,7 @@ import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import CallSplitIcon from '@mui/icons-material/CallSplit';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+import WindowIcon from '@mui/icons-material/Window';
 import UndoIcon from '@mui/icons-material/Undo';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import Footer from "../components/Footer";
@@ -184,7 +184,7 @@ export default function Dashboard() {
               progressIcon = <AttachMoneyIcon color={pattern.color} />;
               break;
             case "Sliding Window":
-              progressIcon = <ViewWeekIcon color={pattern.color} />;
+              progressIcon = <WindowIcon color={pattern.color} />;
               break;
             case "Backtracking":
               progressIcon = <UndoIcon color={pattern.color} />;
