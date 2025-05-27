@@ -21,16 +21,7 @@ import Footer from "../components/Footer";
 import Layout from "../components/Layout";
 import { devMode } from "../config";
 import { useNavigate } from "react-router-dom";
-
-// Placeholder for user data - replace with real user context or props
-const user = {
-  name: "Student",
-  stats: {
-    problemsSolved: 12,
-    patternsMastered: 2,
-    currentStreak: 5,
-  },
-};
+import { fetchUserStats } from "../http_requests/AuthenticationAPIs";
 
 // Use a static array of patterns that match the backend
 const PATTERNS = [
@@ -71,13 +62,38 @@ ProgressBar.propTypes = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [userStats, setUserStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchStats() {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchUserStats();
+        setUserStats(response.data);
+      } catch (err) {
+        setError("Failed to load user stats.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return <Layout backgroundImage="/dashboard_hexagon.jpg"><Box textAlign="center" mt={8}><Typography>Loading...</Typography></Box></Layout>;
+  }
+  if (error) {
+    return <Layout backgroundImage="/dashboard_hexagon.jpg"><Box textAlign="center" mt={8}><Typography color="error">{error}</Typography></Box></Layout>;
+  }
 
   return (
     <Layout backgroundImage="/dashboard_hexagon.jpg">
-
       <Box textAlign="center" mb={4}>
         <Typography variant="h4" fontWeight={700} mb={1}>
-          Welcome, {user.name}!
+          Welcome!
         </Typography>
         <Typography color="text.secondary">
           Your personalized algorithm journey starts here.
@@ -86,25 +102,19 @@ export default function Dashboard() {
 
       <Box
         display="grid"
-        gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr 1fr" }}
+        gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr" }}
         gap={3}
         mb={4}
       >
         <Paper elevation={2} sx={{ p: 2, textAlign: "center" }}>
           <Typography variant="h3" color="primary" fontWeight={700}>
-            {user.stats.problemsSolved}
+            {userStats?.streakInfo?.problemsSolved ?? 0}
           </Typography>
           <Typography color="text.secondary">Problems Solved</Typography>
         </Paper>
         <Paper elevation={2} sx={{ p: 2, textAlign: "center" }}>
-          <Typography variant="h3" color="secondary" fontWeight={700}>
-            {user.stats.patternsMastered}
-          </Typography>
-          <Typography color="text.secondary">Patterns Mastered</Typography>
-        </Paper>
-        <Paper elevation={2} sx={{ p: 2, textAlign: "center" }}>
           <Typography variant="h3" sx={{ color: "#9c27b0", fontWeight: 700 }}>
-            {user.stats.currentStreak}
+            {userStats?.streakInfo?.currentStreak ?? 0}
           </Typography>
           <Typography color="text.secondary">Current Streak</Typography>
         </Paper>
