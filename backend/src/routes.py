@@ -4,8 +4,8 @@ from src.chatgpt.curated_tasks import modify_problem, generate_test_cases
 from src.db.problems import get_problem, add_problem
 from src.db.schemas import ProblemSchema, AttemptSchema
 from src.db.user_attemtps import add_or_update_user_attempt, get_current_user_attempt, \
-    update_user_attempt_result_with_record
-from src.db.user_progress import get_user_profile, create_user_profile
+    update_user_attempt_result_with_record, get_user_solved_stats
+from src.db.user_progress import get_user_profile, create_user_profile, update_user_on_problem_solved
 from src.exceptions import ProblemNotFound
 from src.services.test_runner import run_test_cases_against_solution
 from src.verify_token import verify_token
@@ -19,12 +19,34 @@ ATTEMPTS = "/attempts"
 
 
 def register_routes(app):
-    @app.route('/users/<user_id>', methods=['GET'])
+    @app.route(USERS + '/<user_id>', methods=['GET'])
     def get_user(user_id):
-        user = get_user_profile(user_id)
-        if not user:
-            return create_user_profile(user_id)
-        return user, 200
+        # Check if user exists in DynamoDB
+        user_profile = get_user_profile(user_id)
+
+        if not user_profile:
+            # Create and return new profile
+            new_profile = create_user_profile(user_id)
+            return {
+                "user_id": user_id,
+                "streakInfo": new_profile,
+                "solvedStats": {}
+            }, 201
+
+        # Fetch problem solving stats
+        solved_stats = get_user_solved_stats(user_id)
+
+        return {
+            "user_id": user_id,
+            "streakInfo": {
+                "currentStreak": user_profile.get("currentStreak", 0),
+                "highestStreak": user_profile.get("highestStreak", 0),
+                "problemsSolved": sum(
+                    sum(difficulty_counts.values()) for difficulty_counts in solved_stats.values()
+                )
+            },
+            "solvedStats": solved_stats
+        }, 200
 
     @app.route(PROBLEMS, methods=["GET"])
     @require_auth
@@ -46,7 +68,7 @@ def register_routes(app):
                 "index": problem["index"],
                 "modified_prompt": modified_prompt["prompt"],
                 "passed": False,
-                "number_of_attempts": 1,
+                "number_of_attempts": 0,
             }
             formatted_attempt = add_or_update_user_attempt(attempt_data)
 
@@ -100,6 +122,7 @@ def register_routes(app):
         # Update the attempt record with the test result
         try:
             updated_attempt = update_user_attempt_result_with_record(attempt, overall_passed)
+            update_user_on_problem_solved(attempt)  # update user stats
         except Exception as e:
             return {"error": f"Failed to update attempt: {str(e)}"}, 500
 
@@ -270,6 +293,7 @@ def register_routes(app):
         except Exception as e:
             print("GPT API error:", str(e))
             return {"error": "GPT API failed", "details": str(e)}, 500
+
     app.register_blueprint(chatgpt_bp)
 
 
@@ -289,4 +313,5 @@ def require_auth(route):
             return {"error": "Invalid Token", "error_data": str(e)}, 403
 
         return route(*args, **kwargs)
+
     return decorated

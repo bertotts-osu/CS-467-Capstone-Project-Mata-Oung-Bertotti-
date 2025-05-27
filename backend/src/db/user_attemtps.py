@@ -1,4 +1,6 @@
 import uuid
+from collections import defaultdict
+
 from src.db.models import UserAttemptModel
 from boto3.dynamodb.conditions import Key
 from src.db.dynamodb_utils import get_dynamodb_resource
@@ -120,3 +122,25 @@ def update_user_attempt_result_with_record(attempt_record: dict, passed: bool) -
 
     updated_record = response.get("Attributes", {})
     return updated_record
+
+
+def get_user_solved_stats(user_id: str):
+    dynamodb = get_dynamodb_resource()
+    tbl = dynamodb.Table("Attempts")
+
+    # Get all attempts by the user
+    response = tbl.query(
+        KeyConditionExpression=Key("PK").eq(user_id)
+    )
+
+    items = response.get("Items", [])
+    solved_counts = defaultdict(lambda: defaultdict(int))
+
+    for item in items:
+        if item.get("passed"):
+            pattern = item.get("pattern", "Unknown")
+            difficulty = item.get("difficulty", "Unknown")
+            solved_counts[pattern][difficulty] += 1
+
+    # Convert defaultdict to regular dict for output
+    return {pattern: dict(difficulties) for pattern, difficulties in solved_counts.items()}
