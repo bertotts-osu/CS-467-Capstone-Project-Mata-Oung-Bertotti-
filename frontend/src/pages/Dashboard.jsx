@@ -17,21 +17,44 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import StarIcon from '@mui/icons-material/Star';
 import BoltIcon from '@mui/icons-material/Bolt';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import BuildCircleIcon from '@mui/icons-material/BuildCircle';
+import SearchIcon from '@mui/icons-material/Search';
+import CallSplitIcon from '@mui/icons-material/CallSplit';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+import UndoIcon from '@mui/icons-material/Undo';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import Footer from "../components/Footer";
 import Layout from "../components/Layout";
 import { devMode } from "../config";
 import { useNavigate } from "react-router-dom";
 import { fetchUserStats } from "../http_requests/AuthenticationAPIs";
 
-// Use a static array of patterns that match the backend
+// Problem totals per pattern (from ProblemData.csv)
+const TOTAL_PROBLEMS = {
+  "Greedy Algorithm": 9,
+  "Sliding Window": 9,
+  "Divide and Conquer": 9,
+  "Backtracking": 9,
+  "Binary Search": 10,
+  "Two Pointers": 9,
+};
+
 const PATTERNS = [
   { name: "Binary Search", color: "primary" },
   { name: "Divide and Conquer", color: "secondary" },
   { name: "Greedy Algorithm", color: "success" },
-  { name: "Sliding Window", color: "primary" }
+  { name: "Sliding Window", color: "info" },
+  { name: "Backtracking", color: "warning" },
+  { name: "Two Pointers", color: "error" },
 ];
 
-function ProgressBar({ label, percent, icon }) {
+function ProgressBar({ label, percent, icon, color }) {
   return (
     <Box sx={{ mb: 3 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
@@ -48,6 +71,7 @@ function ProgressBar({ label, percent, icon }) {
       <LinearProgress
         variant="determinate"
         value={percent}
+        color={color}
         sx={{ height: 8, borderRadius: 4 }}
       />
     </Box>
@@ -58,6 +82,7 @@ ProgressBar.propTypes = {
   label: PropTypes.string.isRequired,
   percent: PropTypes.number.isRequired,
   icon: PropTypes.element,
+  color: PropTypes.string.isRequired,
 };
 
 export default function Dashboard() {
@@ -65,6 +90,23 @@ export default function Dashboard() {
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Helper to get total solved for a pattern
+  function getPatternSolvedCount(pattern) {
+    if (!userStats || !userStats.solvedStats) return 0;
+    const difficulties = userStats.solvedStats[pattern] || {};
+    return Object.values(difficulties).reduce((a, b) => a + b, 0);
+  }
+
+  function getPatternTotal(pattern) {
+    return TOTAL_PROBLEMS[pattern] || 0;
+  }
+
+  function getPatternPercent(pattern) {
+    const solved = getPatternSolvedCount(pattern);
+    const total = getPatternTotal(pattern);
+    return total > 0 ? Math.round((solved / total) * 100) : 0;
+  }
 
   useEffect(() => {
     async function fetchStats() {
@@ -126,9 +168,43 @@ export default function Dashboard() {
         <Typography variant="h6" mb={2}>
           Pattern Progress
         </Typography>
-        <ProgressBar label="Recursion" percent={80} icon={<StarIcon color="primary" />} />
-        <ProgressBar label="Sliding Window" percent={40} icon={<BoltIcon color="secondary" />} />
-        <ProgressBar label="Two Pointers" percent={60} icon={<StarIcon sx={{ color: "#43a047" }} />} />
+        {PATTERNS.map((pattern) => {
+          const solved = getPatternSolvedCount(pattern.name);
+          const total = getPatternTotal(pattern.name);
+          const percent = getPatternPercent(pattern.name);
+          let progressIcon;
+          switch (pattern.name) {
+            case "Binary Search":
+              progressIcon = <SearchIcon color={pattern.color} />;
+              break;
+            case "Divide and Conquer":
+              progressIcon = <CallSplitIcon color={pattern.color} />;
+              break;
+            case "Greedy Algorithm":
+              progressIcon = <AttachMoneyIcon color={pattern.color} />;
+              break;
+            case "Sliding Window":
+              progressIcon = <ViewWeekIcon color={pattern.color} />;
+              break;
+            case "Backtracking":
+              progressIcon = <UndoIcon color={pattern.color} />;
+              break;
+            case "Two Pointers":
+              progressIcon = <CompareArrowsIcon color={pattern.color} />;
+              break;
+            default:
+              progressIcon = <StarIcon color={pattern.color} />;
+          }
+          return (
+            <ProgressBar
+              key={pattern.name}
+              label={`${pattern.name} (${solved}/${total})`}
+              percent={percent}
+              color={pattern.color}
+              icon={progressIcon}
+            />
+          );
+        })}
       </Paper>
     </Layout>
   );
