@@ -162,7 +162,7 @@ export default function Dashboard() {
         </Paper>
       </Box>
 
-      <LearningMenuPlaceholder />
+      <LearningMenuPlaceholder userStats={userStats} />
 
       <Paper elevation={2} sx={{ p: 3, mt: 4 }}>
         <Typography variant="h6" mb={2}>
@@ -210,8 +210,14 @@ export default function Dashboard() {
   );
 }
 
-function LearningMenuPlaceholder() {
+function LearningMenuPlaceholder({ userStats }) {
   const navigate = useNavigate();
+  function getNextDifficulty(pattern) {
+    const stats = userStats?.solvedStats?.[pattern] || {};
+    if ((stats['Easy'] || 0) < 3) return 'Easy';
+    if ((stats['Medium'] || 0) < 3) return 'Medium';
+    return 'Hard';
+  }
   return (
     <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
       <Typography variant="h6" gutterBottom>
@@ -223,7 +229,10 @@ function LearningMenuPlaceholder() {
           <ListItem
             button
             key={pattern.name}
-            onClick={() => navigate('/problem', { state: { pattern: pattern.name, difficulty: "Easy" } })}
+            onClick={() => {
+              const difficulty = getNextDifficulty(pattern.name);
+              navigate('/problem', { state: { pattern: pattern.name, difficulty } });
+            }}
           >
             <ListItemIcon>
               <AutoGraphIcon color={pattern.color} />
