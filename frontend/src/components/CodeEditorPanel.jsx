@@ -320,7 +320,6 @@ const CodeEditorPanel = ({
                 },
               }}
             >
-              <Tab label="Console" />
               <Tab label="Output" />
             </Tabs>
             <Box
