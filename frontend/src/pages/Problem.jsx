@@ -293,12 +293,10 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
               <Box aria-label="Problem Description Area">
                 <ProblemDescription problem={problem} loading={loading} />
                 {consoleOutput && !hideRawConsole && (
-                  <Box>
-                    <TestCaseResults
-                      resultDetails={testResultDetails}
-                      overallResult={passFailStatus === "pass"}
-                    />
-                  </Box>
+                  <TestCaseResults
+                    resultDetails={testResultDetails}
+                    overallResult={passFailStatus === "pass"}
+                  />
                 )}
               </Box>
 
