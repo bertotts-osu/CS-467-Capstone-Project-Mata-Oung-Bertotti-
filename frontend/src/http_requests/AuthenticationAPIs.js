@@ -3,6 +3,24 @@ import { jwtDecode } from "jwt-decode";
 
 const path = "/auth";
 
+// Global Axios interceptor for token expiry
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (
+      error.response &&
+      (error.response.status === 401 ||
+        error.response.status === 403 ||
+        error.response.data?.error === "Invalid token")
+    ) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("authRefreshToken");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export async function signup({ name, username, email, password }) {
   const response = await axios.post(
     `${import.meta.env.VITE_SERVER_URL}${path}/signup`, // api endpoint

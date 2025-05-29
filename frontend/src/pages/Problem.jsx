@@ -82,22 +82,17 @@ const Problem = () => {
     setChatMessages(updatedMessages);
     setMessage("");
     try {
-    const assistantReply = await sendMessageToGPT({
-      messages: updatedMessages,
-      problem: problem?.prompt || "",
-      code: code || "",
-      console_output: consoleOutput || "",
-    });
-    setChatMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: assistantReply },
-    ]);
+      const assistantReply = await sendMessageToGPT({
+        messages: updatedMessages,
+        problem: problem?.prompt || "",
+        code: code || "",
+        console_output: consoleOutput || "",
+      });
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: assistantReply },
+      ]);
     } catch (err) {
-      if (err.message === "AUTH_ERROR") {
-        console.log("Redirecting to login due to auth error (sendMessageToGPT)");
-        navigate("/login");
-        return;
-      }
       setError(err.response?.data?.error || err.message);
     }
   }, [message, chatMessages, problem, code, consoleOutput, navigate]);
@@ -120,21 +115,16 @@ const Problem = () => {
     ]);
     setShowHintButton(false);
     try {
-    const assistantReply = await sendMessageToGPT({
-      user_request: hintRequest,
-      submission: "no",
-      hint: "yes",
-    });
-    setChatMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: assistantReply },
-    ]);
+      const assistantReply = await sendMessageToGPT({
+        user_request: hintRequest,
+        submission: "no",
+        hint: "yes",
+      });
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: assistantReply },
+      ]);
     } catch (err) {
-      if (err.message === "AUTH_ERROR") {
-        console.log("Redirecting to login due to auth error (sendMessageToGPT/hint)");
-        navigate("/login");
-        return;
-      }
       setError(err.response?.data?.error || err.message);
     }
   }, [navigate]);
@@ -171,11 +161,6 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
         setPassFailStatus(success ? "pass" : "fail");
       }
     } catch (err) {
-      if (err.message === "AUTH_ERROR") {
-        console.log("Redirecting to login due to auth error (executeCode)");
-        navigate("/login");
-        return;
-      }
       console.error("Submit error:", err);
       setConsoleOutput("Error submitting code.");
       setPassFailStatus("fail");
@@ -197,11 +182,6 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
           localStorage.setItem("attemptId", response.data.attempt_id);
         }
       } catch (err) {
-        if (err.message === "AUTH_ERROR") {
-          console.log("Redirecting to login due to auth error (fetchProblem)");
-          navigate("/login");
-          return;
-        }
         setError(err.response?.data?.error || err.message);
       } finally {
         setLoading(false);

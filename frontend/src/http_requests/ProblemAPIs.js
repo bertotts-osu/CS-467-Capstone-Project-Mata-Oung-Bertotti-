@@ -15,14 +15,8 @@ export async function fetchProblem({ pattern, difficulty }) {
         },
       }
     );
-    if (response.status === 401 || response.data?.error === "Invalid token") {
-      throw new Error("AUTH_ERROR");
-    }
     return response;
   } catch (err) {
-    if (err.response?.status === 401 || err.response?.data?.error === "Invalid token") {
-      throw new Error("AUTH_ERROR");
-    }
     throw err;
   }
 }
@@ -41,14 +35,8 @@ export async function executeCode({ code }) {
         },
       }
     );
-    if (response.status === 401 || response.data?.error === "Invalid token") {
-      throw new Error("AUTH_ERROR");
-    }
     return response;
   } catch (err) {
-    if (err.response?.status === 401 || err.response?.data?.error === "Invalid token") {
-      throw new Error("AUTH_ERROR");
-    }
     throw err;
   }
 }
