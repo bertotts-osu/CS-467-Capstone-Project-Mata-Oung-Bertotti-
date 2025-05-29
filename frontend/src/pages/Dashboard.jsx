@@ -34,6 +34,8 @@ import Layout from "../components/Layout";
 import { devMode } from "../config";
 import { useNavigate } from "react-router-dom";
 import { fetchUserStats } from "../http_requests/AuthenticationAPIs";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 // Problem totals per pattern (from ProblemData.csv)
 const TOTAL_PROBLEMS = {
@@ -54,7 +56,7 @@ const PATTERNS = [
   { name: "Two Pointers", color: "error" },
 ];
 
-function ProgressBar({ label, percent, icon, color }) {
+function ProgressBar({ label, percent, icon, color, completed, breakdown, stepStatus }) {
   return (
     <Box sx={{ mb: 3 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
@@ -62,18 +64,74 @@ function ProgressBar({ label, percent, icon, color }) {
           {icon && <Box mr={1}>{icon}</Box>}
           <Typography variant="body2" fontWeight={600}>
             {label}
+            {completed && (
+              <CheckCircleIcon sx={{ color: 'green', ml: 1, verticalAlign: 'middle' }} fontSize="small" />
+            )}
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
           {percent}%
         </Typography>
       </Box>
-      <LinearProgress
-        variant="determinate"
-        value={percent}
-        color={color}
-        sx={{ height: 8, borderRadius: 4 }}
-      />
+      <Box position="relative" width="100%" mb={1}>
+        <LinearProgress
+          variant="determinate"
+          value={percent}
+          color={color}
+          sx={{ height: 8, borderRadius: 4 }}
+        />
+        {/* Step icons overlay - absolutely positioned, now with Start */}
+        {stepStatus && ['Start', 'Easy', 'Medium', 'Hard'].map((diff, idx) => {
+          // 0% for Start, 33% for Easy, 67% for Medium, 100% for Hard
+          const leftPercent = idx === 0 ? '0%' : idx === 1 ? '33.3%' : idx === 2 ? '66.6%' : '100%';
+          // Step fill logic: Start always empty, Easy if easyComplete, Medium if mediumComplete, Hard if hardComplete
+          let filled = false;
+          if (idx === 1) filled = stepStatus['Easy'];
+          else if (idx === 2) filled = stepStatus['Medium'];
+          else if (idx === 3) filled = stepStatus['Hard'];
+          return (
+            <Box
+              key={diff}
+              position="absolute"
+              top="50%"
+              left={leftPercent}
+              sx={{
+                transform: 'translate(-50%, -50%)',
+                pointerEvents: 'none',
+                zIndex: 1,
+              }}
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+            >
+              {filled
+                ? <CheckCircleIcon sx={{ color: 'green', background: 'white', borderRadius: '50%' }} fontSize="small" />
+                : <RadioButtonUncheckedIcon sx={{ color: 'grey.400', background: 'white', borderRadius: '50%' }} fontSize="small" />}
+            </Box>
+          );
+        })}
+      </Box>
+      {/* Step labels under the bar, aligned with icons */}
+      {stepStatus && (
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          {['Start', 'Easy', 'Medium', 'Hard'].map((diff, idx) => (
+            <Box key={diff} sx={{ width: '25%', textAlign: idx === 0 ? 'left' : idx === 1 ? 'center' : idx === 2 ? 'center' : 'right' }}>
+              <Typography variant="caption" color="text.secondary">
+                {diff}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
+      {breakdown && stepStatus && (
+        <Box mt={0.5} display="flex" gap={2}>
+          {['Easy', 'Medium', 'Hard'].map((diff) => (
+            <Typography key={diff} variant="caption" color="text.secondary">
+              {diff}: {breakdown[diff]?.solved ?? 0}/{breakdown[diff]?.total ?? 0}
+            </Typography>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }
@@ -83,6 +141,9 @@ ProgressBar.propTypes = {
   percent: PropTypes.number.isRequired,
   icon: PropTypes.element,
   color: PropTypes.string.isRequired,
+  completed: PropTypes.bool,
+  breakdown: PropTypes.object,
+  stepStatus: PropTypes.object,
 };
 
 export default function Dashboard() {
@@ -90,6 +151,7 @@ export default function Dashboard() {
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showStepwise, setShowStepwise] = useState(false);
 
   // Helper to get total solved for a pattern
   function getPatternSolvedCount(pattern) {
@@ -102,10 +164,17 @@ export default function Dashboard() {
     return TOTAL_PROBLEMS[pattern] || 0;
   }
 
-  function getPatternPercent(pattern) {
-    const solved = getPatternSolvedCount(pattern);
-    const total = getPatternTotal(pattern);
-    return total > 0 ? Math.round((solved / total) * 100) : 0;
+  function getPatternStepwisePercent(pattern) {
+    if (!userStats || !userStats.solvedStats) return 0;
+    const stats = userStats.solvedStats[pattern] || {};
+    const easyComplete = (stats['Easy'] || 0) >= 3;
+    const mediumComplete = (stats['Medium'] || 0) >= 3;
+    const hardTotal = (TOTAL_PROBLEMS[pattern] || 0) - 6;
+    const hardComplete = (stats['Hard'] || 0) >= hardTotal && hardTotal > 0;
+    if (easyComplete && mediumComplete && hardComplete) return 100;
+    if (easyComplete && mediumComplete) return 67;
+    if (easyComplete) return 33;
+    return 0;
   }
 
   useEffect(() => {
@@ -165,13 +234,23 @@ export default function Dashboard() {
       <LearningMenuPlaceholder userStats={userStats} />
 
       <Paper elevation={2} sx={{ p: 3, mt: 4 }}>
+        <Box display="flex" justifyContent="flex-end" mb={2}>
+          <Button
+            variant={showStepwise ? 'contained' : 'outlined'}
+            color="primary"
+            size="small"
+            onClick={() => setShowStepwise((prev) => !prev)}
+          >
+            {showStepwise ? 'Hide In-Depth Progress' : 'Show In-Depth Progress'}
+          </Button>
+        </Box>
         <Typography variant="h6" mb={2}>
           Pattern Progress
         </Typography>
         {PATTERNS.map((pattern) => {
           const solved = getPatternSolvedCount(pattern.name);
           const total = getPatternTotal(pattern.name);
-          const percent = getPatternPercent(pattern.name);
+          let percent = getPatternStepwisePercent(pattern.name);
           let progressIcon;
           switch (pattern.name) {
             case "Binary Search":
@@ -195,13 +274,29 @@ export default function Dashboard() {
             default:
               progressIcon = <StarIcon color={pattern.color} />;
           }
+          // Calculate breakdown by difficulty
+          const solvedStats = userStats?.solvedStats?.[pattern.name] || {};
+          const breakdown = {
+            Easy: { solved: solvedStats['Easy'] || 0, total: 3 },
+            Medium: { solved: solvedStats['Medium'] || 0, total: 3 },
+            Hard: { solved: solvedStats['Hard'] || 0, total: total - 6 },
+          };
+          const completed = solved === total && total > 0;
+          const stepStatus = {
+            Easy: (solvedStats['Easy'] || 0) >= 3,
+            Medium: (solvedStats['Medium'] || 0) >= 3,
+            Hard: (solvedStats['Hard'] || 0) >= (total - 6) && (total - 6) > 0,
+          };
           return (
             <ProgressBar
               key={pattern.name}
-              label={`${pattern.name} (${solved}/${total})`}
+              label={showStepwise ? `${pattern.name} (Solved: ${solved})` : pattern.name}
               percent={percent}
               color={pattern.color}
               icon={progressIcon}
+              completed={completed}
+              breakdown={breakdown}
+              stepStatus={showStepwise ? stepStatus : undefined}
             />
           );
         })}

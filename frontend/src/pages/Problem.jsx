@@ -82,16 +82,16 @@ const Problem = () => {
     setChatMessages(updatedMessages);
     setMessage("");
     try {
-      const assistantReply = await sendMessageToGPT({
-        messages: updatedMessages,
-        problem: problem?.prompt || "",
-        code: code || "",
-        console_output: consoleOutput || "",
-      });
-      setChatMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: assistantReply },
-      ]);
+    const assistantReply = await sendMessageToGPT({
+      messages: updatedMessages,
+      problem: problem?.prompt || "",
+      code: code || "",
+      console_output: consoleOutput || "",
+    });
+    setChatMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: assistantReply },
+    ]);
     } catch (err) {
       if (err.message === "AUTH_ERROR") {
         console.log("Redirecting to login due to auth error (sendMessageToGPT)");
@@ -120,15 +120,15 @@ const Problem = () => {
     ]);
     setShowHintButton(false);
     try {
-      const assistantReply = await sendMessageToGPT({
-        user_request: hintRequest,
-        submission: "no",
-        hint: "yes",
-      });
-      setChatMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: assistantReply },
-      ]);
+    const assistantReply = await sendMessageToGPT({
+      user_request: hintRequest,
+      submission: "no",
+      hint: "yes",
+    });
+    setChatMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: assistantReply },
+    ]);
     } catch (err) {
       if (err.message === "AUTH_ERROR") {
         console.log("Redirecting to login due to auth error (sendMessageToGPT/hint)");
@@ -293,10 +293,10 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
               <Box aria-label="Problem Description Area">
                 <ProblemDescription problem={problem} loading={loading} />
                 {consoleOutput && !hideRawConsole && (
-                  <TestCaseResults
-                    resultDetails={testResultDetails}
-                    overallResult={passFailStatus === "pass"}
-                  />
+                    <TestCaseResults
+                      resultDetails={testResultDetails}
+                      overallResult={passFailStatus === "pass"}
+                    />
                 )}
               </Box>
 
