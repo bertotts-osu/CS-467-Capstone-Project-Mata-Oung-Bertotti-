@@ -4,31 +4,51 @@ const path = "/problems";
 
 export async function fetchProblem({ pattern, difficulty }) {
   const token = localStorage.getItem("authToken");
-  const response = await axios.get(
-    `${import.meta.env.VITE_SERVER_URL}${path}`,
-    {
-      params: { pattern, difficulty },
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_SERVER_URL}${path}`,
+      {
+        params: { pattern, difficulty },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      }
+    );
+    if (response.status === 401 || response.data?.error === "Invalid token") {
+      throw new Error("AUTH_ERROR");
     }
-  );
-  return response;
+    return response;
+  } catch (err) {
+    if (err.response?.status === 401 || err.response?.data?.error === "Invalid token") {
+      throw new Error("AUTH_ERROR");
+    }
+    throw err;
+  }
 }
 
 export async function executeCode({ code }) {
   const token = localStorage.getItem("authToken");
   const attemptId = localStorage.getItem("attemptId");
-  const response = await axios.patch(
-    `${import.meta.env.VITE_SERVER_URL}/attempts/${attemptId}`,
-    { code },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+  try {
+    const response = await axios.patch(
+      `${import.meta.env.VITE_SERVER_URL}/attempts/${attemptId}`,
+      { code },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      }
+    );
+    if (response.status === 401 || response.data?.error === "Invalid token") {
+      throw new Error("AUTH_ERROR");
     }
-  );
-  return response;
+    return response;
+  } catch (err) {
+    if (err.response?.status === 401 || err.response?.data?.error === "Invalid token") {
+      throw new Error("AUTH_ERROR");
+    }
+    throw err;
+  }
 }
