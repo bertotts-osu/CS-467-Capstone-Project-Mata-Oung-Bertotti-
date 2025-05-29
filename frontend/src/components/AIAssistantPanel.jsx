@@ -46,18 +46,24 @@ const AIAssistantPanel = ({
       sx={{
         width: "max-content",
         maxWidth: 600,
-        minHeight: 500,
+        minWidth: 320,
+        minHeight: 300,
+        maxHeight: "80vh",
+        minHeight: 200,
         display: "flex",
         flexDirection: "column",
         bgcolor: "#fff",
-        borderRadius: 0, // Remove border-radius for a unified look.
+        borderRadius: 0,
         m: 0,
         p: 0,
         position: "fixed",
         bottom: 20,
         right: 5,
         height: "maxContent",
-        maxHeight: "80vh",
+        resize: "both",
+        overflow: "auto",
+        boxShadow: 3,
+        zIndex: 1301,
       }}
       aria-label="AI Algorithm Mentor"
     >
@@ -94,15 +100,13 @@ const AIAssistantPanel = ({
             </IconButton>
           </Tooltip>
         )}
-        {header?.onClose && (
-          <IconButton
-            size="small"
-            onClick={header.onClose}
-            aria-label="Close panel"
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        )}
+        <IconButton
+          size="small"
+          onClick={header?.onClose}
+          aria-label="Close panel"
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
       </Box>
 
       <Divider sx={{ m: 0 }} />
@@ -113,7 +117,6 @@ const AIAssistantPanel = ({
           <Box
             key={idx}
             sx={{
-              // maxWidth: "100%",
               mb: 1.5,
               alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               bgcolor: msg.role === "user" ? "primary.light" : "grey.100",

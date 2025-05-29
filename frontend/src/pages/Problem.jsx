@@ -373,19 +373,8 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
           </>
         )}
 
-        {/* AI Chat Modal */}
-        <Modal
-          open={openAIModal}
-          onClose={() => setOpenAIModal(false)}
-          hideBackdrop
-          aria-labelledby="ai-assistant-modal-title"
-          aria-describedby="ai-assistant-modal-description"
-          sx={{
-            pointerEvents: "auto", // prevents the full-screen wrapper from blocking interaction
-            border: "1.25px solid #ccc",
-            overflow: "hidden",
-          }}
-        >
+        {/* AI Chat Window (not a modal, but a fixed-position window) */}
+        {openAIModal && (
           <AIAssistantPanel
             onClick={() => setOpenAIModal(false)}
             chatMessages={chatMessages}
@@ -411,9 +400,9 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
                   },
                 ]),
             }}
-            aria-label="AI Assistant Panel in Modal"
+            aria-label="AI Assistant Panel Window"
           />
-        </Modal>
+        )}
       </Box>
       {/* Full-Screen Submitting Modal */}
       <Modal
