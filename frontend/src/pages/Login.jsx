@@ -37,7 +37,7 @@ export default function Login() {
       const { message, id_token, refresh_token } = response.data;
       localStorage.setItem("authToken", id_token);
       localStorage.setItem("authRefreshToken", refresh_token);
-      navigate("/"); // Redirect to Dashboard
+      window.location.href = "/"; // Force reload to reset app state
     } catch (err) {
       setError(err.response?.data?.error || err.message);
     }

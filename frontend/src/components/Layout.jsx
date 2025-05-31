@@ -58,11 +58,14 @@ export default function Layout({ children, backgroundImage, centeredContent = tr
           width="100%"
           maxWidth={centeredContent ? 450 : 900}
           mx="auto"
-          bgcolor="white"
-          borderRadius={2}
-          boxShadow={4}
-          p={4}
-          my={centeredContent ? 0 : 4}
+          sx={{
+            bgcolor: 'transparent',
+            background: 'linear-gradient(120deg, #e3f2fd 0%, #ede7f6 100%)',
+            borderRadius: 2,
+            boxShadow: 4,
+            p: 4,
+            my: centeredContent ? 0 : 4,
+          }}
           aria-label="Layout Inner Content Box"
         >
           {children}

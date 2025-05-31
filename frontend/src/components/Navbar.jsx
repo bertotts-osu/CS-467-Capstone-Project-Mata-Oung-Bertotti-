@@ -21,6 +21,9 @@ import ContactMailIcon from "@mui/icons-material/ContactMail";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import MapIcon from '@mui/icons-material/Map';
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
 
@@ -38,7 +41,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "Dashboard", to: "/", icon: <DashboardIcon /> },
-    { label: "Profile", to: "/profile", icon: <AccountCircleIcon /> },
+    { label: "Roadmap", to: "/roadmap", icon: <MapIcon /> },
     { label: "Contact", to: "/contact", icon: <ContactMailIcon /> },
   ];
 

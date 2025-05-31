@@ -11,6 +11,7 @@ import ContactUs from "./pages/ContactUs.jsx";
 import Problem from "./pages/Problem.jsx";
 import { devMode } from "./config";
 import ChatTest from './pages/ChatTest';
+import Roadmap from "./pages/Roadmap.jsx";
 
 export default function App() {
 
@@ -19,18 +20,30 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-  // Simulate login in devMode
-  if (devMode && !localStorage.getItem("authToken")) {
-    localStorage.setItem("authToken", "dev-token");
-  }
+    // Simulate login in devMode
+    if (devMode && !localStorage.getItem("authToken")) {
+      localStorage.setItem("authToken", "dev-token");
+    }
 
-  const token = localStorage.getItem("authToken");
-  if (token) {
-    setIsAuthenticated(true);
-  }
+    const checkAuth = () => {
+      const token = localStorage.getItem("authToken");
+      setIsAuthenticated(!!token);
+    };
 
-  setIsLoading(false);
-}, []);
+    checkAuth();
+    setIsLoading(false);
+
+    // Listen for changes to authToken in localStorage
+    window.addEventListener("storage", (event) => {
+      if (event.key === "authToken") {
+        checkAuth();
+      }
+    });
+
+    return () => {
+      window.removeEventListener("storage", () => {});
+    };
+  }, []);
 
   // Show loading spinner or message while determining if user is authenticated
   if (isLoading) return <div>Loading...</div>;
@@ -67,6 +80,12 @@ export default function App() {
             path: "problem",
             element: devMode || isAuthenticated
               ? <Problem />
+              : <Navigate to="/login" replace />,
+          },
+          {
+            path: "roadmap",
+            element: devMode || isAuthenticated
+              ? <Roadmap />
               : <Navigate to="/login" replace />,
           },
         ],
