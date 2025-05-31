@@ -132,52 +132,32 @@ export default function Roadmap() {
             </Typography>
           </Box>
 
-          {/* Intro Section */}
-          <Paper elevation={4} sx={{ p: 3, mb: 3, borderRadius: 4, boxShadow: 6 }}>
-            {nextStep && percentComplete < 100 && (
-              <Box display="flex" alignItems="center" gap={1}>
-                <ArrowForwardIcon color="primary" />
-                <Typography variant="subtitle1" color="primary.main" fontWeight={700}>
-                  Next Up: <b>{nextStep.pattern}</b> - <b>{nextStep.difficulty}</b>
-                </Typography>
-              </Box>
-            )}
-            {percentComplete === 100 && (
-              <Box display="flex" alignItems="center" gap={1}>
-                <CelebrationIcon color="success" />
-                <Typography variant="subtitle1" color="success.main" fontWeight={700}>
-                  You've mastered every pattern! 🎉
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-
-          {/* Summary Card */}
-          <Paper elevation={6} sx={{ p: 3, mb: 4, borderRadius: 4, boxShadow: 8, maxWidth: 600, mx: 'auto' }}>
-            <Grid container alignItems="center" spacing={2}>
-              <Grid item>
-                <Avatar sx={{ bgcolor: 'primary.main', width: 64, height: 64, boxShadow: 3 }}>
-                  <EmojiEventsIcon fontSize="large" />
-                </Avatar>
+          {/* Summary Card (Your Progress) - now first */}
+          <Paper elevation={6} sx={{ p: 3, mb: 4, borderRadius: 4, boxShadow: 8, maxWidth: 600, mx: 'auto', textAlign: 'center' }}>
+            <Grid container alignItems="center" justifyContent="center" spacing={2}>
+              <Grid item xs={12}>
+                <Box display="flex" alignItems="center" justifyContent="center" gap={1} mb={0.5}>
+                  <EmojiEventsIcon fontSize="large" sx={{ color: 'primary.main' }} />
+                  <Typography variant="h5" fontWeight={800} letterSpacing={0.5} textAlign="center">
+                    Your Progress
+                  </Typography>
+                </Box>
               </Grid>
-              <Grid item xs>
-                <Typography variant="h5" fontWeight={800} mb={0.5} letterSpacing={0.5}>
-                  Your Progress
-                </Typography>
-                <Box display="flex" alignItems="center" gap={4}>
-                  <Box>
+              <Grid item xs={12}>
+                <Box display="flex" alignItems="center" justifyContent="center" gap={4} mt={2}>
+                  <Box textAlign="center">
                     <Typography variant="h4" color="primary.main" fontWeight={700}>{totalSolved}</Typography>
                     <Typography variant="caption" color="text.secondary">Solved</Typography>
                   </Box>
-                  <Box>
+                  <Box textAlign="center">
                     <Typography variant="h4" fontWeight={700}>{userStats?.streakInfo?.currentStreak ?? 0}</Typography>
                     <Typography variant="caption" color="text.secondary">Current Streak</Typography>
                   </Box>
-                  <Box>
+                  <Box textAlign="center">
                     <Typography variant="h4" fontWeight={700}>{userStats?.streakInfo?.highestStreak ?? 0}</Typography>
                     <Typography variant="caption" color="text.secondary">Best Streak</Typography>
                   </Box>
-                  <Box minWidth={180}>
+                  <Box minWidth={180} textAlign="center">
                     <LinearProgress
                       variant="determinate"
                       value={percentComplete}
@@ -196,6 +176,26 @@ export default function Roadmap() {
                 </Box>
               </Grid>
             </Grid>
+          </Paper>
+
+          {/* Intro Section (Next Up) - now after progress */}
+          <Paper elevation={4} sx={{ p: 3, mb: 3, borderRadius: 4, boxShadow: 6 }}>
+            {nextStep && percentComplete < 100 && (
+              <Box display="flex" alignItems="center" gap={1}>
+                <ArrowForwardIcon color="primary" />
+                <Typography variant="subtitle1" color="primary.main" fontWeight={700}>
+                  Next Up: <b>{nextStep.pattern}</b> - <b>{nextStep.difficulty}</b>
+                </Typography>
+              </Box>
+            )}
+            {percentComplete === 100 && (
+              <Box display="flex" alignItems="center" gap={1}>
+                <CelebrationIcon color="success" />
+                <Typography variant="subtitle1" color="success.main" fontWeight={700}>
+                  You've mastered every pattern! 🎉
+                </Typography>
+              </Box>
+            )}
           </Paper>
 
           {/* Pattern Roadmap */}
@@ -289,15 +289,14 @@ export default function Roadmap() {
                               }
                               color={isComplete ? "success" : isNext ? "primary" : percent > 0 ? "info" : "default"}
                               variant={isComplete ? "filled" : "outlined"}
-                              clickable={isNext || isComplete}
-                              onClick={() => (isNext || isComplete) && navigate('/problem', { state: { pattern: name, difficulty: diff } })}
+                              clickable
+                              onClick={() => navigate('/problem', { state: { pattern: name, difficulty: diff } })}
                               sx={{
                                 fontWeight: 600,
                                 fontSize: 15,
                                 px: 2,
                                 py: 1,
                                 minWidth: 90,
-                                opacity: isNext || isComplete ? 1 : 0.5,
                                 boxShadow: isNext ? 4 : 1,
                                 background: isNext ? 'linear-gradient(90deg, #bbdefb 0%, #e1bee7 100%)' : undefined,
                                 transition: 'all 0.3s',

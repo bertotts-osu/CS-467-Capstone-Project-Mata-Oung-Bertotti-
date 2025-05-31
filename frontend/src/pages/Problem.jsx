@@ -55,6 +55,7 @@ const Problem = () => {
   const [hideRawConsole, setHideRawConsole] = useState(false);
   const [showHoverText, setShowHoverText] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDifficulty, setShowDifficulty] = useState(false);
 
   const handleCodeChange = useCallback((newValue) => {
     if (!newValue) return;
@@ -169,6 +170,8 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
     }
   }, [code, navigate]);
 
+  const handleRevealDifficulty = () => setShowDifficulty(true);
+
   useEffect(() => {
     async function loadProblem() {
       setLoading(true);
@@ -271,7 +274,7 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
             >
               {/* Problem Description Area (with examples and test cases) */}
               <Box aria-label="Problem Description Area">
-                <ProblemDescription problem={problem} loading={loading} />
+                <ProblemDescription problem={problem} loading={loading} showDifficulty={showDifficulty} onRevealDifficulty={handleRevealDifficulty} />
                 {consoleOutput && !hideRawConsole && (
                     <TestCaseResults
                       resultDetails={testResultDetails}
