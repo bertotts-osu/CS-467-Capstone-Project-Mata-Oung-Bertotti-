@@ -89,8 +89,8 @@ const CodeEditor = ({
             </Box>
           }
           options={{
-            minimap: { enabled: false },
-            fontSize: 14,
+            minimap: { enabled: true },
+            fontSize: 15,
             lineNumbers: "on",
             readOnly: readOnly,
             scrollBeyondLastLine: false,
@@ -99,6 +99,17 @@ const CodeEditor = ({
             insertSpaces: true,
             detectIndentation: true,
             wordWrap: "on",
+            suggestOnTriggerCharacters: true,
+            autoClosingBrackets: "always",
+            autoClosingQuotes: "always",
+            folding: true,
+            formatOnType: true,
+            formatOnPaste: true,
+            renderLineHighlight: "all",
+            selectOnLineNumbers: true,
+            cursorBlinking: "blink",
+            cursorSmoothCaretAnimation: true,
+            bracketPairColorization: { enabled: true },
           }}
           aria-label="Monaco Code Editor"
         />

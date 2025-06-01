@@ -31,6 +31,7 @@ import { sendMessageToGPT } from "../http_requests/ChatGptAPI";
 import { red } from "@mui/material/colors";
 import CircularProgress from "@mui/material/CircularProgress";
 import logo from "../assets/logo.png";
+import { useUserStats } from "../contexts/UserStatsContext";
 
 const Problem = () => {
   const [code, setCode] = useState();
@@ -56,6 +57,7 @@ const Problem = () => {
   const [showHoverText, setShowHoverText] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDifficulty, setShowDifficulty] = useState(false);
+  const { refreshUserStats } = useUserStats();
 
   const handleCodeChange = useCallback((newValue) => {
     if (!newValue) return;
@@ -152,6 +154,14 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
           overallResult ? "Passed" : "Failed"
         }\n\n${testCaseDetails}`;
         setConsoleOutput(resultMsg);
+        // Trigger user stats re-fetch after a successful submission
+        if (overallResult) {
+          try {
+            await refreshUserStats();
+          } catch (err) {
+            console.error("Failed to update user stats after submission", err);
+          }
+        }
       } else {
         const { output, error, success } = response.data;
         setConsoleOutput(
@@ -168,7 +178,7 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
     } finally {
       setIsSubmitting(false); // 👈 Hide full-screen loader
     }
-  }, [code, navigate]);
+  }, [code, navigate, refreshUserStats]);
 
   const handleRevealDifficulty = () => setShowDifficulty(true);
 
@@ -180,7 +190,7 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
         const pattern = location.state?.pattern || "Sliding Window";
         const difficulty = location.state?.difficulty || "Medium";
         const response = await fetchProblem({ pattern, difficulty });
-        setProblem(response.data);
+        setProblem({ ...response.data, requestedDifficulty: difficulty });
         if (response.data.attempt_id) {
           localStorage.setItem("attemptId", response.data.attempt_id);
         }

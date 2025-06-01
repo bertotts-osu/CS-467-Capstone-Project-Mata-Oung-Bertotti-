@@ -7,7 +7,9 @@ const ProblemDescription = ({ problem, loading, testCases, showDifficulty, onRev
   // Debug log
   console.log("ProblemDescription props:", { problem, showDifficulty });
   // Mock fallback for missing difficulty
-  const safeProblem = problem && !problem.difficulty ? { ...problem, difficulty: 'Medium' } : problem;
+  const safeProblem = problem && !problem.difficulty
+    ? { ...problem, difficulty: (problem.requestedDifficulty || 'Medium') }
+    : problem;
   return (
     <Paper
       elevation={4}

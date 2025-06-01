@@ -6,12 +6,14 @@ import {
   Link,
   IconButton,
   InputAdornment,
+  Skeleton,
 } from "@mui/material";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { devMode } from "../config";
+// import OnboardingTour from "./OnboardingTour";
 
-export default function Layout({ children, backgroundImage, centeredContent = true }) {
+export default function Layout({ children, backgroundImage, centeredContent = true, loading = false }) {
   return (
     <Box
       minHeight="100vh"
@@ -68,7 +70,12 @@ export default function Layout({ children, backgroundImage, centeredContent = tr
           }}
           aria-label="Layout Inner Content Box"
         >
-          {children}
+          {/* <OnboardingTour /> */}
+          {loading ? (
+            <Skeleton variant="rectangular" width="100%" height={400} sx={{ borderRadius: 2, my: 2 }} />
+          ) : (
+            children
+          )}
         </Box>
       </Box>
 

@@ -33,7 +33,7 @@ import Footer from "../components/Footer";
 import Layout from "../components/Layout";
 import { devMode } from "../config";
 import { useNavigate } from "react-router-dom";
-import { fetchUserStats } from "../http_requests/AuthenticationAPIs";
+import { useUserStats } from "../contexts/UserStatsContext";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
@@ -148,9 +148,7 @@ ProgressBar.propTypes = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [userStats, setUserStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { userStats, loading, error } = useUserStats();
   const [showStepwise, setShowStepwise] = useState(false);
 
   // Helper to get total solved for a pattern
@@ -177,31 +175,12 @@ export default function Dashboard() {
     return 0;
   }
 
-  useEffect(() => {
-    async function fetchStats() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetchUserStats();
-        setUserStats(response.data);
-      } catch (err) {
-        setError("Failed to load user stats.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchStats();
-  }, []);
-
-  if (loading) {
-    return <Layout backgroundImage="/dashboard_hexagon.jpg"><Box textAlign="center" mt={8}><Typography>Loading...</Typography></Box></Layout>;
-  }
   if (error) {
     return <Layout backgroundImage="/dashboard_hexagon.jpg"><Box textAlign="center" mt={8}><Typography color="error">{error}</Typography></Box></Layout>;
   }
 
   return (
-    <Layout backgroundImage="/dashboard_hexagon.jpg">
+    <Layout backgroundImage="/dashboard_hexagon.jpg" loading={loading}>
       <Box textAlign="center" mb={4}>
         <Typography variant="h4" fontWeight={700} mb={1}>
           Welcome!
@@ -322,7 +301,6 @@ function LearningMenuPlaceholder({ userStats }) {
       <List dense>
         {PATTERNS.map((pattern) => (
           <ListItem
-            button
             key={pattern.name}
             onClick={() => {
               const difficulty = getNextDifficulty(pattern.name);

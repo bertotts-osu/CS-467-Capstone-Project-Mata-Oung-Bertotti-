@@ -11,7 +11,7 @@ import UndoIcon from '@mui/icons-material/Undo';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CelebrationIcon from '@mui/icons-material/Celebration';
-import { fetchUserStats } from "../http_requests/AuthenticationAPIs";
+import { useUserStats } from "../contexts/UserStatsContext";
 import Layout from "../components/Layout";
 
 const PATTERNS = [
@@ -67,25 +67,7 @@ function getEncouragement(percentComplete, totalSolved) {
 
 export default function Roadmap() {
   const navigate = useNavigate();
-  const [userStats, setUserStats] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-
-  React.useEffect(() => {
-    async function fetchStats() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetchUserStats();
-        setUserStats(response.data);
-      } catch (err) {
-        setError("Failed to load user stats.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchStats();
-  }, []);
+  const { userStats, loading, error } = useUserStats();
 
   if (loading) return <Box p={4}><Typography>Loading...</Typography></Box>;
   if (error) return <Box p={4}><Typography color="error">{error}</Typography></Box>;
@@ -104,7 +86,7 @@ export default function Roadmap() {
   const encouragement = getEncouragement(percentComplete, totalSolved);
 
   return (
-    <Layout centeredContent={false} backgroundImage="/roadmap_bg.jpg">
+    <Layout centeredContent={false} backgroundImage="/roadmap_bg.jpg" loading={loading}>
       <Paper
         elevation={8}
         sx={{
@@ -135,7 +117,7 @@ export default function Roadmap() {
           {/* Summary Card (Your Progress) - now first */}
           <Paper elevation={6} sx={{ p: 3, mb: 4, borderRadius: 4, boxShadow: 8, maxWidth: 600, mx: 'auto', textAlign: 'center' }}>
             <Grid container alignItems="center" justifyContent="center" spacing={2}>
-              <Grid item xs={12}>
+              <Grid>
                 <Box display="flex" alignItems="center" justifyContent="center" gap={1} mb={0.5}>
                   <EmojiEventsIcon fontSize="large" sx={{ color: 'primary.main' }} />
                   <Typography variant="h5" fontWeight={800} letterSpacing={0.5} textAlign="center">
@@ -143,7 +125,7 @@ export default function Roadmap() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={12}>
+              <Grid>
                 <Box display="flex" alignItems="center" justifyContent="center" gap={4} mt={2}>
                   <Box textAlign="center">
                     <Typography variant="h4" color="primary.main" fontWeight={700}>{totalSolved}</Typography>
@@ -268,6 +250,7 @@ export default function Roadmap() {
                   <Typography variant="body2" color="text.secondary" mb={1} ml={7}>{desc}</Typography>
                   <Stack direction="row" spacing={2} ml={6}>
                     {DIFFICULTIES.map((diff) => {
+                      console.log('Rendering chip for:', diff);
                       const solved = userStats?.solvedStats?.[name]?.[diff] || 0;
                       const isComplete = solved >= TOTAL_PER_DIFFICULTY;
                       const isNext = nextStep && nextStep.pattern === name && nextStep.difficulty === diff;

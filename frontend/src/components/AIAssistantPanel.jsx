@@ -49,7 +49,6 @@ const AIAssistantPanel = ({
         minWidth: 320,
         minHeight: 300,
         maxHeight: "80vh",
-        minHeight: 200,
         display: "flex",
         flexDirection: "column",
         bgcolor: "#fff",

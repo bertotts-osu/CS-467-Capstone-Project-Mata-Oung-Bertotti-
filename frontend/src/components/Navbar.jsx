@@ -26,12 +26,14 @@ import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import MapIcon from '@mui/icons-material/Map';
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
+// import { useTour } from "../contexts/TourContext";
 
 export default function Navbar() {
   const isAuthenticated = !!localStorage.getItem("authToken");
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // const { setRun, setStepIndex } = useTour();
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -40,9 +42,9 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { label: "Dashboard", to: "/", icon: <DashboardIcon /> },
-    { label: "Roadmap", to: "/roadmap", icon: <MapIcon /> },
-    { label: "Contact", to: "/contact", icon: <ContactMailIcon /> },
+    { label: "Dashboard", to: "/", icon: <DashboardIcon />, replace: false },
+    { label: "Roadmap", to: "/roadmap", icon: <MapIcon />, replace: true },
+    { label: "Contact", to: "/contact", icon: <ContactMailIcon />, replace: false },
   ];
 
   return (
@@ -92,6 +94,7 @@ export default function Navbar() {
               color={location.pathname === link.to ? "secondary" : "inherit"}
               component={RouterLink}
               to={link.to}
+              replace={link.replace}
               startIcon={link.icon}
               sx={{
                 fontWeight: location.pathname === link.to ? 700 : 400,
@@ -111,6 +114,15 @@ export default function Navbar() {
               {link.label}
             </Button>
           ))}
+          {/* <Button
+            color="info"
+            variant="outlined"
+            sx={{ ml: 2, fontWeight: 600, borderRadius: 2, px: 2, py: 1 }}
+            onClick={() => { setStepIndex(0); setRun(true); }}
+            aria-label="Show Onboarding Tour"
+          >
+            Show Tour
+          </Button> */}
           {isAuthenticated ? (
             <Button
               color="inherit"
@@ -174,6 +186,7 @@ export default function Navbar() {
                   key={link.to}
                   component={RouterLink}
                   to={link.to}
+                  replace={link.replace}
                   selected={location.pathname === link.to}
                   aria-label={`Navigate to ${link.label}`}
                 >
