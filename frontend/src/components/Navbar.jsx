@@ -24,6 +24,7 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import MapIcon from '@mui/icons-material/Map';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
 // import { useTour } from "../contexts/TourContext";
@@ -45,6 +46,7 @@ export default function Navbar() {
     { label: "Dashboard", to: "/", icon: <DashboardIcon />, replace: false },
     { label: "Roadmap", to: "/roadmap", icon: <MapIcon />, replace: true },
     { label: "Contact", to: "/contact", icon: <ContactMailIcon />, replace: false },
+    { label: "About", to: "/about", icon: <HelpOutlineIcon />, replace: false },
   ];
 
   return (

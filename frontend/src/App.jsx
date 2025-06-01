@@ -12,6 +12,7 @@ import Problem from "./pages/Problem.jsx";
 import { devMode } from "./config";
 import ChatTest from './pages/ChatTest';
 import Roadmap from "./pages/Roadmap.jsx";
+import About from "./pages/About.jsx";
 
 export default function App() {
 
@@ -90,6 +91,7 @@ export default function App() {
           },
         ],
       },
+      { path: "/about", element: <About /> },
   ]);
 
   return <RouterProvider router={router} />;
