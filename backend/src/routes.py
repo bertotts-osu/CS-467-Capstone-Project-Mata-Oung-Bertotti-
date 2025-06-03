@@ -122,7 +122,8 @@ def register_routes(app):
         # Update the attempt record with the test result
         try:
             updated_attempt = update_user_attempt_result_with_record(attempt, overall_passed)
-            update_user_on_problem_solved(attempt)  # update user stats
+            if overall_passed:
+                update_user_on_problem_solved(attempt)  # update user stats only if passed
         except Exception as e:
             return {"error": f"Failed to update attempt: {str(e)}"}, 500
 
