@@ -1,3 +1,6 @@
+// Signup.jsx
+// This page provides the user registration form, including password validation, strength meter, and error handling.
+
 import { useState } from "react";
 import {
   TextField,
@@ -16,6 +19,10 @@ import Footer from "../components/Footer";
 import Layout from "../components/Layout";
 import { devMode } from "../config";
 
+/**
+ * Signup page component.
+ * Displays a registration form with password validation and strength meter.
+ */
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -30,6 +37,9 @@ export default function Signup() {
 
   const navigate = useNavigate();
 
+  /**
+   * Checks if the password meets all requirements.
+   */
   const isPasswordValid = (pwd) => {
     const minLength = /.{8,}/;
     const hasNumber = /[0-9]/;
@@ -46,6 +56,9 @@ export default function Signup() {
     );
   };
 
+  /**
+   * Returns a score (0-5) for password strength.
+   */
   const getPasswordStrength = (pwd) => {
     let score = 0;
     if (pwd.length >= 8) score++;
@@ -56,6 +69,9 @@ export default function Signup() {
     return score; // 0 to 5
   };
 
+  /**
+   * Handles form submission, validates input, and calls signup API.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -75,7 +91,6 @@ export default function Signup() {
 
     try {
       const response = await signup({ name, username, email, password });
-      console.log(response.data);
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.error || err.message);

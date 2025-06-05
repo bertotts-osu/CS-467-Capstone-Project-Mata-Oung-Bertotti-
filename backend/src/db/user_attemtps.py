@@ -1,3 +1,6 @@
+# user_attemtps.py
+# Provides functions for managing user problem attempts in DynamoDB, including creation, update, and statistics.
+
 import uuid
 from collections import defaultdict
 
@@ -9,8 +12,10 @@ from datetime import datetime
 
 def add_or_update_user_attempt(data: dict) -> dict:
     """
-    Creates a new attempt record with SK = pattern#difficulty#index#attempt_id.
+    Creates a new attempt record or updates an existing one for a user and problem.
     Attempts are never updated unless the full composite key already exists.
+    :param data: Dictionary with attempt data (user_id, pattern, difficulty, index, modified_prompt, passed, etc.)
+    :return: Dictionary with attempt details
     """
     user_id = data["user_id"]
     attempt_id = data.get("attempt_id") or str(uuid.uuid4())  # generate if missing
@@ -55,7 +60,9 @@ def add_or_update_user_attempt(data: dict) -> dict:
 
 def get_current_user_attempt(attempt_id: str):
     """
-    Fetches a user attempt based on the attempt_id
+    Fetches a user attempt based on the attempt_id using a GSI.
+    :param attempt_id: The unique attempt ID
+    :return: Dictionary with attempt details or None if not found
     """
     dynamodb = get_dynamodb_resource()
     tbl = dynamodb.Table("Attempts")
@@ -86,7 +93,7 @@ def get_current_user_attempt(attempt_id: str):
 def update_user_attempt_result_with_record(attempt_record: dict, passed: bool) -> dict:
     """
     Update a user attempt record in DynamoDB using the provided record dictionary.
-    This function increments the number_of_attempts, updates the 'passed' field,
+    Increments the number_of_attempts, updates the 'passed' field,
     and sets the last_attempt_time to the current time (in ISO format).
 
     :param attempt_record: The user attempt record as a dictionary.
@@ -125,6 +132,11 @@ def update_user_attempt_result_with_record(attempt_record: dict, passed: bool) -
 
 
 def get_user_solved_stats(user_id: str):
+    """
+    Returns a dictionary of solved problem counts by pattern and difficulty for a user.
+    :param user_id: The user's unique identifier
+    :return: Dictionary of the form {pattern: {difficulty: count}}
+    """
     dynamodb = get_dynamodb_resource()
     tbl = dynamodb.Table("Attempts")
 

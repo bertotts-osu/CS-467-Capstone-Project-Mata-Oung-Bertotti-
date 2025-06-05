@@ -1,10 +1,20 @@
+// ChatTest.jsx
+// This page provides a simple test interface for sending and receiving messages with the backend ChatGPT API.
+
 import React, { useState } from 'react';
 
+/**
+ * ChatTest page component.
+ * Allows users to test the chat API by sending messages and viewing responses.
+ */
 export default function ChatTest() {
   const [message, setMessage] = useState('');
   const [chatLog, setChatLog] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Sends the user's message to the backend and updates the chat log with the response.
+   */
   const sendMessage = async () => {
     if (!message.trim()) return;
 

@@ -1,70 +1,5 @@
-# import tempfile
-# import subprocess
-# import os
-#
-#
-# def indent_code(code_string, spaces=4):
-#     """Indent each non-empty line in code_string by the given number of spaces."""
-#     indentation = ' ' * spaces
-#     return "\n".join(indentation + line if line.strip() != "" else line for line in code_string.splitlines())
-#
-#
-# def run_test_cases_against_solution(code: str, test_cases: list) -> list:
-#     """
-#     Runs a Python implementation against generated test cases.
-#     Mutates each test case in-place to include 'user_output' and 'result'.
-#     """
-#     for test_case in test_cases:
-#         test_input = test_case['input'].strip()
-#         expected_output = str(test_case['expected_output'])
-#
-#         # Determine how to insert the test_input:
-#         if "\n" in test_input:
-#             # If the test input spans multiple lines, assume it includes its own assignment(s).
-#             indented_test_input = indent_code(test_input, spaces=4)
-#             setup_code = indented_test_input
-#         else:
-#             # Otherwise, treat test_input as a tuple to unpack via "arr, target = ..."
-#             setup_code = f"    arr, target = {test_input}"
-#
-#         test_code = (
-#                 code.strip() + "\n\n" +
-#                 "if __name__ == '__main__':\n" +
-#                 setup_code + "\n" +
-#                 "    result = main(arr, target)\n" +
-#                 "    print(result)\n"
-#         )
-#
-#         try:
-#             with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp:
-#                 temp.write(test_code)
-#                 temp_filename = temp.name
-#
-#             try:
-#                 proc = subprocess.run(
-#                     ['python', temp_filename],
-#                     capture_output=True,
-#                     timeout=5
-#                 )
-#                 actual_output = proc.stdout.decode().strip()
-#                 error_output = proc.stderr.decode().strip()
-#
-#                 passed = (actual_output == expected_output) and (proc.returncode == 0)
-#                 test_case["user_output"] = actual_output
-#                 test_case["error"] = error_output if not passed else None
-#                 test_case["result"] = "passed" if passed else "failed"
-#             finally:
-#                 os.remove(temp_filename)
-#         except subprocess.TimeoutExpired:
-#             test_case["user_output"] = ""
-#             test_case["error"] = "Execution timed out."
-#             test_case["result"] = "failed"
-#         except Exception as e:
-#             test_case["user_output"] = ""
-#             test_case["error"] = str(e)
-#             test_case["result"] = "failed"
-#
-#     return test_cases
+# test_runner.py
+# Provides utilities to run user-submitted Python code against generated test cases in a secure, isolated environment.
 
 import tempfile
 import subprocess
@@ -72,7 +7,12 @@ import os
 
 
 def indent_code(code_string, spaces=4):
-    """Indent each non-empty line in code_string by the given number of spaces."""
+    """
+    Indent each non-empty line in code_string by the given number of spaces.
+    :param code_string: The code to indent
+    :param spaces: Number of spaces to indent
+    :return: Indented code string
+    """
     indentation = ' ' * spaces
     return "\n".join(indentation + line if line.strip() != "" else line for line in code_string.splitlines())
 
@@ -88,6 +28,9 @@ def run_test_cases_against_solution(code: str, test_cases: list) -> list:
       2. Multi-line test input: executes assignment code (e.g. "coins = [1, 2, 5]\ntarget = 11")
          and then uses inspect to build the call to main. In this example, if main expects
          'arr' but only 'coins' is defined, we make that mapping.
+    :param code: User's Python code as a string
+    :param test_cases: List of test case dictionaries with 'input' and 'expected_output'
+    :return: List of test case dictionaries with added 'user_output', 'error', and 'result'
     """
     print(test_cases)
     for test_case in test_cases:
@@ -98,7 +41,7 @@ def run_test_cases_against_solution(code: str, test_cases: list) -> list:
             # Multi-line test input: use exec to set up variables.
             # Build a code block that:
             #   1. Executes the test_input, storing results in __test_vars.
-            #   2. Inspects main’s parameter names.
+            #   2. Inspects main's parameter names.
             #   3. Tries to fetch each parameter from __test_vars.
             #       (As an example, if main expects 'arr' but __test_vars lacks it,
             #        check for 'coins'.)

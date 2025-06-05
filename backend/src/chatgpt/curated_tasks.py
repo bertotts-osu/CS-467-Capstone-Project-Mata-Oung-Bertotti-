@@ -1,3 +1,6 @@
+# curated_tasks.py
+# Provides functions for modifying coding problems and generating test cases using ChatGPT/Azure OpenAI.
+
 import json
 
 
@@ -5,6 +8,10 @@ def modify_problem(original_prompt, openAI_client):
     """
     Takes an original problem prompt and returns a modified version
     so that the solution is not easily memorized.
+    :param original_prompt: The original problem prompt string
+    :param openAI_client: An instance of AzureOpenAIClient
+    :return: Dictionary with keys 'name', 'prompt', and 'example'
+    :raises ValueError: If the AI response is not valid JSON
     """
     instruction = (
         """
@@ -25,7 +32,7 @@ def modify_problem(original_prompt, openAI_client):
         """
     )
 
-    # build the conversation context
+    # Build the conversation context for the AI
     messages = [
         {"role": "system", "content": "You are an Algorithm Mentor"},
         {"role": "user", "content": f"{instruction}\n\nProblem:\n{original_prompt}"}
@@ -43,6 +50,10 @@ def modify_problem(original_prompt, openAI_client):
 def generate_test_cases(prompt, openAI_client):
     """
     Takes an original problem prompt and returns test cases to test the problem's solution.
+    :param prompt: The problem prompt string
+    :param openAI_client: An instance of AzureOpenAIClient
+    :return: List of up to 3 test case dictionaries
+    :raises ValueError: If the AI response is not valid JSON
     """
     instruction = (
         """
@@ -62,7 +73,7 @@ def generate_test_cases(prompt, openAI_client):
         """
     )
 
-    # build the conversation context
+    # Build the conversation context for the AI
     messages = [
         {"role": "system", "content": "You are an Algorithm Mentor"},
         {"role": "user", "content": f"{instruction}\n\nProblem:\n{prompt}"}

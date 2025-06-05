@@ -1,3 +1,6 @@
+// ContactUs.jsx
+// This page provides a contact form for users to send messages or feedback to the platform team.
+
 import { useState } from "react";
 import {
   Box,
@@ -8,12 +11,19 @@ import {
 } from "@mui/material";
 import Layout from "../components/Layout"; // ✅ Import Layout
 
+/**
+ * ContactUs page component.
+ * Displays a contact form for users to send messages or feedback.
+ */
 export default function ContactUs() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
+  /**
+   * Handles form submission, resets form, and shows confirmation.
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     // Hook to backend/email service here if needed
@@ -31,7 +41,7 @@ export default function ContactUs() {
 
       {submitted && (
         <Alert severity="success" sx={{ mb: 2 }}>
-          Message sent! We’ll get back to you shortly.
+          Message sent! We'll get back to you shortly.
         </Alert>
       )}
 

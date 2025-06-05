@@ -1,118 +1,6 @@
-// import React from 'react';
-// import { Box, Button, Tabs, Tab, Paper, Divider, Typography, Alert } from '@mui/material';
-// import CodeEditor from './Editor';
+// CodeEditorPanel.jsx
+// This component provides the main code editor interface, including a resizable editor, pass/fail alerts, and output console for coding problems.
 
-// const CodeEditorPanel = ({
-//   code,
-//   onCodeChange,
-//   onSubmit,
-//   consoleTab,
-//   onConsoleTabChange,
-//   consoleOutput,
-//   setAIPanelOpen,
-//   passFailStatus,
-//   onRetry,
-//   onRun
-// }) => (
-//   <Paper sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 2, boxShadow: 4, bgcolor: '#fff', minHeight: 0, overflow: 'hidden', m: 0, p: 2 }} elevation={4}>
-//     <Box
-//       sx={{
-//         display: 'flex',
-//         alignItems: 'center',
-//         gap: 2,
-//         mb: 1,
-//         mt: 1,
-//         px: 1,
-//       }}
-//     >
-//       <Button
-//         variant="outlined"
-//         color="info"
-//         onClick={() => setAIPanelOpen && setAIPanelOpen(true)}
-//         sx={{ fontSize: 13, px: 2, py: 1, height: 40 }}
-//       >
-//         Open AI Assistant
-//       </Button>
-//       <Typography variant="subtitle1" fontWeight={600} sx={{ color: 'text.secondary', fontSize: 15 }}>
-//         Language: Python
-//       </Typography>
-//       {passFailStatus && (
-//         <Button
-//           variant="outlined"
-//           color="secondary"
-//           onClick={onRetry}
-//           sx={{ fontSize: 13, px: 2, py: 1, height: 40 }}
-//         >
-//           Retry
-//         </Button>
-//       )}
-//       <Button
-//         variant="contained"
-//         color="success"
-//         onClick={onSubmit}
-//         sx={{ fontSize: 15, px: 3, py: 1, height: 40, fontWeight: 700, boxShadow: 2 }}
-//       >
-//         Submit
-//       </Button>
-//     </Box>
-//     <Divider sx={{ mb: 1 }} />
-//     {/* Pass/Fail Alert */}
-//     {passFailStatus && (
-//       <Alert severity={passFailStatus === 'pass' ? 'success' : 'error'} sx={{ mb: 1, fontWeight: 600, fontSize: 16 }}>
-//         {passFailStatus === 'pass' ? '✅ Pass! All test cases succeeded.' : '❌ Fail. Try again!'}
-//       </Alert>
-//     )}
-//     {/* Editor and Console as flex children */}
-//     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-//       <Box sx={{ flex: 1, minHeight: 40, overflow: 'hidden', borderRadius: 2, bgcolor: '#181a1b', p: 0.5, mb: 1, display: 'flex', flexDirection: 'column' }}>
-//         <CodeEditor
-//           value={code}
-//           onChange={onCodeChange}
-//           height="100%"
-//           language="python"
-//         />
-//       </Box>
-//       <Divider sx={{ mb: 0.5 }} />
-//       <Box sx={{ height: 120, borderTop: '1px solid #333', bgcolor: '#23272b', borderRadius: 2, p: 0.5, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-//         <Tabs
-//           value={consoleTab}
-//           onChange={onConsoleTabChange}
-//           sx={{
-//             minHeight: '24px',
-//             borderBottom: '1px solid #333',
-//             '.MuiTab-root': {
-//               color: '#999',
-//               minHeight: '30px',
-//               fontSize: 12,
-//               '&.Mui-selected': {
-//                 color: 'white'
-//               }
-//             }
-//           }}
-//         >
-//           <Tab label="Console" />
-//           <Tab label="Output" />
-//         </Tabs>
-//         <Box
-//           sx={{
-//             p: 2,
-//             flex: 1,
-//             minHeight: 0,
-//             overflow: 'auto',
-//             fontFamily: 'monospace',
-//             fontSize: '0.85rem',
-//             color: 'white',
-//             whiteSpace: 'pre-wrap'
-//           }}
-//         >
-//           {consoleOutput}
-//         </Box>
-//       </Box>
-//     </Box>
-//   </Paper>
-// );
-
-// export default CodeEditorPanel;
 import React, { useState, useRef } from "react";
 import {
   Box,
@@ -126,6 +14,20 @@ import {
 } from "@mui/material";
 import CodeEditor from "./Editor";
 
+/**
+ * CodeEditorPanel component.
+ * Provides a resizable code editor, pass/fail alerts, and output console for coding problems.
+ * @param {object} props
+ * @param {string} props.code - The current code in the editor.
+ * @param {function} props.onCodeChange - Handler for code changes.
+ * @param {function} props.onSubmit - Handler for submitting code.
+ * @param {number} props.consoleTab - Current selected tab in the console area.
+ * @param {function} props.onConsoleTabChange - Handler for changing console tab.
+ * @param {string} props.consoleOutput - Output to display in the console area.
+ * @param {string} [props.passFailStatus] - Pass/fail status for alerts.
+ * @param {function} [props.onRetry] - Handler for retrying a failed submission.
+ * @param {function} [props.onRun] - Handler for running code (if applicable).
+ */
 const CodeEditorPanel = ({
   code,
   onCodeChange,
@@ -143,7 +45,9 @@ const CodeEditorPanel = ({
   const startY = useRef(0);
   const startHeight = useRef(editorHeight);
 
-  // When the user starts dragging the handle
+  /**
+   * When the user starts dragging the handle, set up mouse event listeners.
+   */
   const handleMouseDown = (e) => {
     isDragging.current = true;
     startY.current = e.clientY;
@@ -152,7 +56,9 @@ const CodeEditorPanel = ({
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Update the editor height as the mouse moves
+  /**
+   * Update the editor height as the mouse moves.
+   */
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
     const delta = e.clientY - startY.current;
@@ -160,7 +66,9 @@ const CodeEditorPanel = ({
     setEditorHeight(newHeight);
   };
 
-  // Clean up when the user stops dragging
+  /**
+   * Clean up when the user stops dragging.
+   */
   const handleMouseUp = () => {
     isDragging.current = false;
     document.removeEventListener("mousemove", handleMouseMove);
@@ -245,7 +153,6 @@ const CodeEditorPanel = ({
               height: 40,
               fontWeight: 700,
               marginLeft: "auto",
-              // Removed the invalid borderRadius style so it works as expected
             }}
           >
             Submit

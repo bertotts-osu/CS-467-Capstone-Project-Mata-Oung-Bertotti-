@@ -1,3 +1,6 @@
+// Login.jsx
+// This page provides the user login form, including error handling and password visibility toggle.
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -16,6 +19,10 @@ import Footer from "../components/Footer";
 import Layout from "../components/Layout";
 import { devMode } from "../config";
 
+/**
+ * Login page component.
+ * Displays a login form with error handling and password visibility toggle.
+ */
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -23,6 +30,9 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  /**
+   * Handles form submission, validates input, and calls login API.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); // Clear previous errors

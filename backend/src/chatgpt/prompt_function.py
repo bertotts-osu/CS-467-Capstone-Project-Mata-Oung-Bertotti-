@@ -1,6 +1,8 @@
+# prompt_function.py
+# Provides prompt engineering utilities for constructing instructions and user prompts for ChatGPT/Azure OpenAI.
+
 # JSON Payload from Backend to GPT 4-o structure:
 """
-
 The GPT AI Tool receives a dictionary with the following JSON format and data:
 
 data =
@@ -26,6 +28,12 @@ def build_gpt_prompt(data):
 # Instructions
 
 def build_gpt_instructions(problem_type, difficulty):
+    """
+    Build a system prompt for the AI tutor based on problem type and difficulty.
+    :param problem_type: The algorithm/pattern category
+    :param difficulty: The difficulty level
+    :return: Instructional prompt string for the AI
+    """
     instructions = f"""
     You are an AI tutor helping a user practice coding problems based on algorithm patterns.
     The user has selected the following problem category:
@@ -53,6 +61,11 @@ def build_gpt_instructions(problem_type, difficulty):
 # User Interaction
 
 def build_user_prompt(settings):
+    """
+    Build a user-facing prompt for the AI based on user settings and requests.
+    :param settings: Dictionary with keys like 'hint', 'submission', and 'user_request'
+    :return: User prompt string for the AI
+    """
     messages = []
 
     if settings.get("hint") == "yes":

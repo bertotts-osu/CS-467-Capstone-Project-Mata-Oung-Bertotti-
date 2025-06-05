@@ -1,3 +1,6 @@
+// Dashboard.jsx
+// This page serves as the user's dashboard, summarizing progress, streaks, and providing quick access to learning paths and pattern progress.
+
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import {
@@ -47,6 +50,7 @@ const TOTAL_PROBLEMS = {
   "Two Pointers": 9,
 };
 
+// List of algorithm patterns with display color
 const PATTERNS = [
   { name: "Binary Search", color: "primary" },
   { name: "Divide and Conquer", color: "secondary" },
@@ -56,6 +60,9 @@ const PATTERNS = [
   { name: "Two Pointers", color: "error" },
 ];
 
+/**
+ * ProgressBar component displays a labeled progress bar with step icons and breakdown by difficulty.
+ */
 function ProgressBar({ label, percent, icon, color, completed, breakdown, stepStatus }) {
   return (
     <Box sx={{ mb: 3 }}>
@@ -146,6 +153,10 @@ ProgressBar.propTypes = {
   stepStatus: PropTypes.object,
 };
 
+/**
+ * Dashboard page component.
+ * Displays user progress, streaks, and pattern progress bars.
+ */
 export default function Dashboard() {
   const navigate = useNavigate();
   const { userStats, loading, error } = useUserStats();
@@ -162,6 +173,7 @@ export default function Dashboard() {
     return TOTAL_PROBLEMS[pattern] || 0;
   }
 
+  // Returns percent complete for a pattern, stepwise by difficulty
   function getPatternStepwisePercent(pattern) {
     if (!userStats || !userStats.solvedStats) return 0;
     const stats = userStats.solvedStats[pattern] || {};
@@ -284,6 +296,10 @@ export default function Dashboard() {
   );
 }
 
+/**
+ * LearningMenuPlaceholder component.
+ * Provides quick navigation to the next unsolved difficulty for each pattern.
+ */
 function LearningMenuPlaceholder({ userStats }) {
   const navigate = useNavigate();
   function getNextDifficulty(pattern) {

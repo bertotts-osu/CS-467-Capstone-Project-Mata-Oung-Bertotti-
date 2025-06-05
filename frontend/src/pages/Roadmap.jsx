@@ -1,3 +1,7 @@
+// Roadmap.jsx
+// This page provides a visual and interactive overview of the user's algorithm learning journey.
+// It tracks progress across algorithm patterns and difficulties, offers encouragement, and highlights the next recommended step.
+
 import React from "react";
 import { Box, Typography, Paper, Chip, Stack, Divider, LinearProgress, Tooltip, Grid, Avatar, Badge } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +18,7 @@ import CelebrationIcon from '@mui/icons-material/Celebration';
 import { useUserStats } from "../contexts/UserStatsContext";
 import Layout from "../components/Layout";
 
+// List of algorithm patterns with metadata for display
 const PATTERNS = [
   { name: "Sliding Window", icon: <WindowIcon />, color: "#42a5f5", desc: "Efficiently solve problems involving subarrays or substrings by maintaining a window over data." },
   { name: "Two Pointers", icon: <CompareArrowsIcon />, color: "#7e57c2", desc: "Use two pointers to traverse data from different ends or at different speeds for optimal solutions." },
@@ -23,9 +28,14 @@ const PATTERNS = [
   { name: "Backtracking", icon: <UndoIcon />, color: "#ab47bc", desc: "Explore all possible solutions by building candidates incrementally and abandoning invalid ones." },
 ];
 const DIFFICULTIES = ["Easy", "Medium", "Hard"];
-const TOTAL_PER_DIFFICULTY = 3;
+const TOTAL_PER_DIFFICULTY = 3; // Number of problems per pattern/difficulty
 const TOTAL_PROBLEMS = PATTERNS.length * DIFFICULTIES.length * TOTAL_PER_DIFFICULTY;
 
+/**
+ * Returns the next recommended step for the user based on unsolved problems.
+ * @param {object} userStats - The user's statistics object.
+ * @returns {object|null} The next pattern/difficulty to work on, or null if complete.
+ */
 function getNextStep(userStats) {
   // Build a list of all pattern/difficulty pairs not yet mastered
   const candidates = [];
@@ -56,6 +66,12 @@ function getNextStep(userStats) {
   return null;
 }
 
+/**
+ * Returns an encouragement message based on the user's progress.
+ * @param {number} percentComplete - Percentage of roadmap completed.
+ * @param {number} totalSolved - Total number of problems solved.
+ * @returns {string} Encouragement message.
+ */
 function getEncouragement(percentComplete, totalSolved) {
   if (totalSolved === 0) return "Welcome! Let's start your journey—click the first step below.";
   if (percentComplete < 25) return "Great start! Keep going and build your foundation.";
@@ -65,6 +81,10 @@ function getEncouragement(percentComplete, totalSolved) {
   return "Congratulations! You've completed the roadmap. Consider reviewing or helping others.";
 }
 
+/**
+ * Roadmap page component.
+ * Displays user progress, next recommended step, and a visual map of algorithm mastery.
+ */
 export default function Roadmap() {
   const navigate = useNavigate();
   const { userStats, loading, error } = useUserStats();
@@ -114,7 +134,7 @@ export default function Roadmap() {
             </Typography>
           </Box>
 
-          {/* Summary Card (Your Progress) - now first */}
+          {/* Summary Card (Your Progress) */}
           <Paper elevation={6} sx={{ p: 3, mb: 4, borderRadius: 4, boxShadow: 8, maxWidth: 600, mx: 'auto', textAlign: 'center' }}>
             <Grid container alignItems="center" justifyContent="center" spacing={2}>
               <Grid>
@@ -127,18 +147,22 @@ export default function Roadmap() {
               </Grid>
               <Grid>
                 <Box display="flex" alignItems="center" justifyContent="center" gap={4} mt={2}>
+                  {/* Total solved problems */}
                   <Box textAlign="center">
                     <Typography variant="h4" color="primary.main" fontWeight={700}>{totalSolved}</Typography>
                     <Typography variant="caption" color="text.secondary">Solved</Typography>
                   </Box>
+                  {/* Current streak */}
                   <Box textAlign="center">
                     <Typography variant="h4" fontWeight={700}>{userStats?.streakInfo?.currentStreak ?? 0}</Typography>
                     <Typography variant="caption" color="text.secondary">Current Streak</Typography>
                   </Box>
+                  {/* Best streak */}
                   <Box textAlign="center">
                     <Typography variant="h4" fontWeight={700}>{userStats?.streakInfo?.highestStreak ?? 0}</Typography>
                     <Typography variant="caption" color="text.secondary">Best Streak</Typography>
                   </Box>
+                  {/* Progress bar */}
                   <Box minWidth={180} textAlign="center">
                     <LinearProgress
                       variant="determinate"
@@ -160,7 +184,7 @@ export default function Roadmap() {
             </Grid>
           </Paper>
 
-          {/* Intro Section (Next Up) - now after progress */}
+          {/* Next Up Section */}
           <Paper elevation={4} sx={{ p: 3, mb: 3, borderRadius: 4, boxShadow: 6 }}>
             {nextStep && percentComplete < 100 && (
               <Box display="flex" alignItems="center" gap={1}>
@@ -247,10 +271,12 @@ export default function Roadmap() {
                       <Typography variant="caption" color="text.secondary">{percent}%</Typography>
                     </Box>
                   </Box>
+                  {/* Pattern description */}
                   <Typography variant="body2" color="text.secondary" mb={1} ml={7}>{desc}</Typography>
+                  {/* Difficulty chips for this pattern */}
                   <Stack direction="row" spacing={2} ml={6}>
                     {DIFFICULTIES.map((diff) => {
-                      console.log('Rendering chip for:', diff);
+                      // Number of solved problems for this pattern/difficulty
                       const solved = userStats?.solvedStats?.[name]?.[diff] || 0;
                       const isComplete = solved >= TOTAL_PER_DIFFICULTY;
                       const isNext = nextStep && nextStep.pattern === name && nextStep.difficulty === diff;

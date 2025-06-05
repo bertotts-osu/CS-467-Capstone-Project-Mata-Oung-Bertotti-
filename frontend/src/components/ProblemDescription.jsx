@@ -1,11 +1,22 @@
+// ProblemDescription.jsx
+// This component displays the coding problem, including its name, prompt, difficulty, and example input/output.
+
 import React from "react";
 import { Box, Paper, Typography, Divider, Button, Chip } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 
+/**
+ * ProblemDescription component.
+ * Displays the coding problem's name, prompt, difficulty, and example.
+ * @param {object} props
+ * @param {object} props.problem - The problem object to display.
+ * @param {boolean} props.loading - Whether the problem is loading.
+ * @param {Array} [props.testCases] - Optional test cases (unused here).
+ * @param {boolean} props.showDifficulty - Whether to show the difficulty chip.
+ * @param {function} props.onRevealDifficulty - Handler for revealing the difficulty.
+ */
 const ProblemDescription = ({ problem, loading, testCases, showDifficulty, onRevealDifficulty }) => {
-  // Debug log
-  console.log("ProblemDescription props:", { problem, showDifficulty });
   // Mock fallback for missing difficulty
   const safeProblem = problem && !problem.difficulty
     ? { ...problem, difficulty: (problem.requestedDifficulty || 'Medium') }

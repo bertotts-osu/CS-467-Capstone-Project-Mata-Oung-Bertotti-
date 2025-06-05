@@ -1,9 +1,17 @@
+# user_progress.py
+# Provides functions for managing and tracking user progress and streaks in DynamoDB.
+
 from datetime import datetime, UTC, timezone, timedelta
 from boto3.dynamodb.conditions import Key
 from src.db.dynamodb_utils import get_dynamodb_resource
 
 
 def get_user_profile(user_id):
+    """
+    Retrieve a user's profile from the Users table.
+    :param user_id: The user's unique identifier
+    :return: Cleaned user profile dictionary or None if not found
+    """
     dynamodb = get_dynamodb_resource()
     user_table = dynamodb.Table("Users")
 
@@ -24,10 +32,15 @@ def get_user_profile(user_id):
 
 
 def create_user_profile(user_id):
+    """
+    Create a new user profile with default values in the Users table.
+    :param user_id: The user's unique identifier
+    :return: Dictionary with initial profile stats
+    """
     dynamodb = get_dynamodb_resource()
     user_table = dynamodb.Table("Users")
 
-    # create a default profile
+    # Create a default profile
     new_profile = {
         "PK": f"USER#{user_id}",
         "SK": "PROFILE",
@@ -49,6 +62,11 @@ def create_user_profile(user_id):
 
 
 def update_user_on_problem_solved(attempt):
+    """
+    Update the user's profile when a problem is solved, handling streaks and problem count.
+    :param attempt: Dictionary containing attempt information (must include user_id)
+    :return: Dictionary with update message and new streak/problem stats
+    """
     user_id = attempt["user_id"]
     dynamodb = get_dynamodb_resource()
     user_table = dynamodb.Table("Users")
@@ -112,6 +130,11 @@ def update_user_on_problem_solved(attempt):
 
 
 def get_user_streak_info(user_id: str):
+    """
+    Retrieve the user's streak and problem solved info from the Users table.
+    :param user_id: The user's unique identifier
+    :return: Dictionary with current streak, highest streak, and problems solved
+    """
     dynamodb = get_dynamodb_resource()
     user_table = dynamodb.Table("Users")
 

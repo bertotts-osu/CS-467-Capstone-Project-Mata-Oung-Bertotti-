@@ -1,5 +1,12 @@
+// Footer.jsx
+// This component displays the footer with contact link and copyright.
+
 import { Box, Link, Typography } from "@mui/material";
 
+/**
+ * Footer component.
+ * Displays a footer with a contact link and copyright information.
+ */
 export default function Footer() {
   return (
     <Box
@@ -10,6 +17,7 @@ export default function Footer() {
       sx={{ width: '100%' }}
     >
       <Typography variant="body2" color="text.secondary">
+        {/* Contact link and copyright */}
         <Link href="/contact" underline="hover">
           Contact Us
         </Link>{" "}

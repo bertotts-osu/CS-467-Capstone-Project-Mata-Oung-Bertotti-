@@ -1,3 +1,6 @@
+// About.jsx
+// This page provides an overview of the platform and instructions for new users on how to navigate and use the main features.
+
 import React from "react";
 import { Box, Typography, Paper, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Button, Link, Divider, Avatar, Stack } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -9,6 +12,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
 import Layout from "../components/Layout";
 
+// Steps for the vertical stepper, each representing a main feature of the platform
 const steps = [
   {
     label: "Dashboard",
@@ -32,6 +36,10 @@ const steps = [
   },
 ];
 
+/**
+ * About page component.
+ * Displays an introduction and instructions for using the AI Algorithm Mentor platform.
+ */
 export default function About() {
   return (
     <Layout centeredContent={false} backgroundImage="/help.jpg">
@@ -52,8 +60,10 @@ export default function About() {
           How to Use the Platform
         </Typography>
         <Typography variant="body1" color="text.secondary" mb={3}>
+          {/* Instructions for using the main features, with links to each page */}
           Use the <Link href="/dashboard" color="primary" underline="hover">Dashboard</Link> to track your progress and streaks. Explore the <Link href="/roadmap" color="secondary" underline="hover">Roadmap</Link> to visualize your learning path and jump to the next recommended problem. On the <Link href="/problem" color="success" underline="hover">Problem page</Link>, read the problem, use the code editor, and submit your solution. The AI Mentor is always available for hints and explanations!
         </Typography>
+        {/* Stepper showing the main features of the platform */}
         <Stepper orientation="vertical" activeStep={-1} sx={{ mb: 4 }}>
           {steps.map((step, idx) => (
             <Step key={step.label}>

@@ -1,3 +1,7 @@
+// App.jsx
+// Main React component for the AI-Algorithm-Mentor frontend application.
+// Handles authentication state and sets up routing for all pages.
+
 import React, { useState, useEffect } from "react";
 import {
   RouterProvider,
@@ -15,13 +19,20 @@ import Roadmap from "./pages/Roadmap.jsx";
 import About from "./pages/About.jsx";
 
 export default function App() {
+  /**
+   * Main App component. Handles authentication state and routing.
+   */
 
-  // determine if the user is authenticated
+  // State to track if the user is authenticated
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // State to track if authentication check is loading
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate login in devMode
+    /**
+     * On mount, check authentication and set up localStorage event listener.
+     * In devMode, simulate login by setting a dummy token.
+     */
     if (devMode && !localStorage.getItem("authToken")) {
       localStorage.setItem("authToken", "dev-token");
     }
@@ -49,12 +60,12 @@ export default function App() {
   // Show loading spinner or message while determining if user is authenticated
   if (isLoading) return <div>Loading...</div>;
 
+  // Define the app's routes using React Router
   const router = createBrowserRouter([
       /* public routes */
       { path: "/login", element: <Login /> },
       { path: "/signup", element: <Signup /> },
       { path: "/contact", element: <ContactUs /> },
-
 
       { path: "/chat-test", element: <ChatTest /> },
 
@@ -94,5 +105,6 @@ export default function App() {
       { path: "/about", element: <About /> },
   ]);
 
+  // Render the router provider
   return <RouterProvider router={router} />;
 }

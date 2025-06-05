@@ -1,3 +1,6 @@
+# api.py
+# Defines a Flask blueprint and utility functions for ChatGPT/Azure OpenAI endpoints and prompt handling.
+
 import os
 import requests
 import traceback
@@ -14,6 +17,12 @@ AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")  # e.g. 2024-11-20
 
 
 def ask_gpt(messages):
+    """
+    Send a chat completion request to Azure OpenAI and return the response content.
+    :param messages: List of message dicts for the chat (role/content)
+    :return: The content of the AI's reply as a string, or error dict
+    :raises ValueError: If required environment variables are missing
+    """
     endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "").rstrip("/")
     deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
     api_version = os.getenv("AZURE_OPENAI_API_VERSION")
@@ -63,11 +72,14 @@ if __name__ == "__main__":
 
 chatgpt_bp = Blueprint("chatgpt", __name__)
 
-import traceback  # at the top if not already imported
-
 
 @chatgpt_bp.route("/api/problem-chat", methods=["POST"])
 def problem_chat():
+    """
+    Flask route for handling problem chat requests to the AI assistant.
+    Expects JSON with 'problem_type', 'difficulty', and user request info.
+    :return: JSON response with the AI's reply or error message
+    """
     try:
         data = request.json
         problem_type = data.get("problem_type")

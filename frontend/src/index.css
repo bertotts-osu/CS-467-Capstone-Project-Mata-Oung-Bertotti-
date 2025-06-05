@@ -1,3 +1,8 @@
+/* index.css
+   Main stylesheet for the AI-Algorithm-Mentor React frontend application.
+   Defines global styles, typography, and theming for light/dark modes.
+*/
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -13,6 +18,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Link styles */
 a {
   font-weight: 500;
   color: #646cff;
@@ -22,6 +28,7 @@ a:hover {
   color: #535bf2;
 }
 
+/* Body layout and base styles */
 body {
   margin: 0;
   display: flex;
@@ -30,11 +37,13 @@ body {
   min-height: 100vh;
 }
 
+/* Heading styles */
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
 
+/* Button styles */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -54,6 +63,7 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Light mode overrides */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

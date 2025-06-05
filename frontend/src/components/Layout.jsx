@@ -1,3 +1,6 @@
+// Layout.jsx
+// This component provides a consistent page layout, including background, navbar, footer, and optional loading state for all pages.
+
 import {
   TextField,
   Button,
@@ -13,6 +16,15 @@ import Footer from "./Footer";
 import { devMode } from "../config";
 // import OnboardingTour from "./OnboardingTour";
 
+/**
+ * Layout component.
+ * Wraps page content with navbar, footer, background image, and optional loading skeleton.
+ * @param {object} props
+ * @param {React.ReactNode} props.children - The main content to display.
+ * @param {string} [props.backgroundImage] - Optional background image URL.
+ * @param {boolean} [props.centeredContent=true] - Whether to center content vertically.
+ * @param {boolean} [props.loading=false] - Whether to show a loading skeleton.
+ */
 export default function Layout({ children, backgroundImage, centeredContent = true, loading = false }) {
   return (
     <Box

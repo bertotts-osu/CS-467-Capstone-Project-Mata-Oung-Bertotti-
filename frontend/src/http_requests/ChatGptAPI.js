@@ -1,5 +1,13 @@
+// ChatGptAPI.js
+// This module provides an API function for sending messages to the backend ChatGPT integration and receiving replies.
+
 import axios from "axios";
 
+/**
+ * Sends a message payload to the backend ChatGPT API and returns the assistant's reply.
+ * @param {object} payload - The message payload (messages, problem, code, etc.)
+ * @returns {Promise<string>} The assistant's reply
+ */
 export async function sendMessageToGPT(payload) {
   try {
     const response = await axios.post(

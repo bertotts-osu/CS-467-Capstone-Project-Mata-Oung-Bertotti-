@@ -1,3 +1,6 @@
+// AIAssistantPanel.jsx
+// This component provides the interactive AI chat panel, including markdown/code rendering, message input, and chat history.
+
 import React, { useEffect, useRef } from "react";
 import {
   Box,
@@ -15,6 +18,18 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
+/**
+ * AIAssistantPanel component.
+ * Provides an interactive chat panel for AI assistance, with markdown/code rendering and message input.
+ * @param {object} props
+ * @param {function} props.onClick - Handler for clicking the panel (optional).
+ * @param {Array} props.chatMessages - Array of chat message objects ({role, content}).
+ * @param {string} props.message - Current message input value.
+ * @param {function} props.onMessageChange - Handler for message input changes.
+ * @param {function} props.onKeyPress - Handler for key press in message input.
+ * @param {function} props.onSendMessage - Handler for sending a message.
+ * @param {object} props.header - Header configuration (icon, title, onClose, onClearChat).
+ */
 const AIAssistantPanel = ({
   onClick,
   chatMessages,
@@ -33,6 +48,9 @@ const AIAssistantPanel = ({
     }
   }, [chatMessages]);
 
+  /**
+   * Clears the chat history if the header provides an onClearChat handler.
+   */
   const handleClearChat = () => {
     if (typeof header?.onClearChat === "function") {
       header.onClearChat();

@@ -1,3 +1,6 @@
+# routes.py
+# This module defines all Flask routes for user, problem, attempt, authentication, and AI chat endpoints.
+
 from flask import request, g
 from marshmallow import ValidationError
 from src.chatgpt.curated_tasks import modify_problem, generate_test_cases
@@ -19,8 +22,13 @@ ATTEMPTS = "/attempts"
 
 
 def register_routes(app):
+    """
+    Registers all API routes/endpoints to the Flask app.
+    :param app: Flask app instance
+    """
     @app.route(USERS + '/<user_id>', methods=['GET'])
     def get_user(user_id):
+        """Fetches user profile and solved stats, creates profile if not found."""
         # Check if user exists in DynamoDB
         user_profile = get_user_profile(user_id)
 
@@ -51,6 +59,7 @@ def register_routes(app):
     @app.route(PROBLEMS, methods=["GET"])
     @require_auth
     def fetch_problem():
+        """Fetches a coding problem for the user by pattern and difficulty."""
         pattern = request.args.get('pattern')
         difficulty = request.args.get('difficulty')
 
@@ -87,6 +96,7 @@ def register_routes(app):
     @app.route(ATTEMPTS + "/<attempt_id>", methods=["PATCH"])
     @require_auth
     def process_problem_attempt(attempt_id):
+        """Processes a user's code submission for a problem attempt."""
         # Validate the attempt_id using your schema
         schema = AttemptSchema()
         try:
@@ -134,6 +144,7 @@ def register_routes(app):
 
     @app.route(AUTH + "/signup", methods=['POST'])
     def register_user():
+        """Registers a new user using AWS Cognito."""
         try:
             data = request.get_json()
             name = data["name"]
@@ -163,6 +174,7 @@ def register_routes(app):
 
     @app.route(AUTH + "/login", methods=['POST'])
     def login_user():
+        """Authenticates a user and returns tokens using AWS Cognito."""
         try:
             data = request.get_json()
             username = data.get("username")
@@ -201,6 +213,7 @@ def register_routes(app):
     @app.route(PROBLEMS, methods=['POST'])
     @require_auth
     def create_new_problem():
+        """Creates a new coding problem (admin use)."""
         body = request.get_json()
         if not body:
             return {"error": "Request body is missing"}, 400
@@ -230,6 +243,7 @@ def register_routes(app):
 
     @app.route('/api/chat', methods=['POST'])
     def chat_with_gpt():
+        """Handles chat requests to the AI assistant (ChatGPT/Azure OpenAI)."""
         try:
             from openai import AzureOpenAI
             import os
@@ -299,6 +313,9 @@ def register_routes(app):
 
 
 def require_auth(route):
+    """
+    Decorator to require JWT authentication for protected routes.
+    """
     @wraps(route)
     def decorated(*args, **kwargs):
         auth_header = request.headers.get("Authorization")

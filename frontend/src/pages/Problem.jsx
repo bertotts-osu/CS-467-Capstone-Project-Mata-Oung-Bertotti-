@@ -1,3 +1,6 @@
+// Problem.jsx
+// This page provides the interactive coding problem interface, including the code editor, problem description, test case results, and AI assistant chat.
+
 import React, { useState, useCallback, useEffect } from "react";
 import {
   Box,
@@ -33,7 +36,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import logo from "../assets/logo.png";
 import { useUserStats } from "../contexts/UserStatsContext";
 
+/**
+ * Problem page component.
+ * Provides the main interface for solving coding problems, submitting code, viewing results, and interacting with the AI mentor.
+ */
 const Problem = () => {
+  // State variables for code, chat, UI, and problem data
   const [code, setCode] = useState();
   const [message, setMessage] = useState("");
   const [consoleTab, setConsoleTab] = useState(0);
@@ -59,22 +67,32 @@ const Problem = () => {
   const [showDifficulty, setShowDifficulty] = useState(false);
   const { refreshUserStats } = useUserStats();
 
+  /**
+   * Handles code changes in the editor.
+   * @param {string} newValue - The updated code.
+   */
   const handleCodeChange = useCallback((newValue) => {
     if (!newValue) return;
-    console.log(newValue);
     setCode(newValue); // Updates the state correctly
-
-    console.log("Code updated:", newValue); // Debugging log to verify updates
   }, []);
 
+  /**
+   * Handles tab changes in the console output area.
+   */
   const handleConsoleTabChange = (event, newValue) => {
     setConsoleTab(newValue);
   };
 
+  /**
+   * Handles changes in the AI chat message input.
+   */
   const handleMessageChange = (event) => {
     setMessage(event.target.value);
   };
 
+  /**
+   * Sends a message to the AI assistant and updates the chat.
+   */
   const handleSendMessage = useCallback(async () => {
     if (!message.trim()) {
       setError("Please enter a message.");
@@ -100,6 +118,9 @@ const Problem = () => {
     }
   }, [message, chatMessages, problem, code, consoleOutput, navigate]);
 
+  /**
+   * Handles Enter key press in the chat input to send message.
+   */
   const handleKeyPress = useCallback(
     (event) => {
       if (event.key === "Enter" && !event.shiftKey) {
@@ -110,6 +131,9 @@ const Problem = () => {
     [handleSendMessage]
   );
 
+  /**
+   * Requests a hint from the AI assistant.
+   */
   const handleHintClick = useCallback(async () => {
     const hintRequest = "Can I have a hint?";
     setChatMessages((prev) => [
@@ -132,9 +156,12 @@ const Problem = () => {
     }
   }, [navigate]);
 
+  /**
+   * Submits the user's code for execution and displays results.
+   */
   const handleSubmit = useCallback(async () => {
     try {
-      setIsSubmitting(true); // 👈 Show full-screen loader
+      setIsSubmitting(true); // Show full-screen loader
       setConsoleOutput("Submitting code...");
       setConsoleTab(0);
       const response = await executeCode({ code });
@@ -176,12 +203,16 @@ Result: ${tc.result}${tc.error ? `\nError: ${tc.error}` : ""}`
       setConsoleOutput("Error submitting code.");
       setPassFailStatus("fail");
     } finally {
-      setIsSubmitting(false); // 👈 Hide full-screen loader
+      setIsSubmitting(false); // Hide full-screen loader
     }
   }, [code, navigate, refreshUserStats]);
 
+  /**
+   * Reveals the problem's difficulty to the user.
+   */
   const handleRevealDifficulty = () => setShowDifficulty(true);
 
+  // Load the problem when the page loads or location changes
   useEffect(() => {
     async function loadProblem() {
       setLoading(true);

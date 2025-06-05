@@ -1,3 +1,6 @@
+// Navbar.jsx
+// This component provides the main navigation bar for the application, including desktop and mobile navigation, authentication actions, and branding.
+
 import {
   AppBar,
   Toolbar,
@@ -29,6 +32,10 @@ import React, { useState } from "react";
 import logo from "../assets/logo.png";
 // import { useTour } from "../contexts/TourContext";
 
+/**
+ * Navbar component.
+ * Provides the main navigation bar for the app, including links, authentication actions, and responsive mobile drawer.
+ */
 export default function Navbar() {
   const isAuthenticated = !!localStorage.getItem("authToken");
   const navigate = useNavigate();
@@ -36,12 +43,16 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   // const { setRun, setStepIndex } = useTour();
 
+  /**
+   * Handles user logout by clearing tokens and redirecting to login.
+   */
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("authRefreshToken");
     navigate("/login");
   };
 
+  // Navigation links for both desktop and mobile
   const navLinks = [
     { label: "Dashboard", to: "/", icon: <DashboardIcon />, replace: false },
     { label: "Roadmap", to: "/roadmap", icon: <MapIcon />, replace: true },
@@ -60,7 +71,7 @@ export default function Navbar() {
         sx={{ display: "flex", justifyContent: "space-between" }}
         aria-label="Navigation Toolbar"
       >
-        {/* App Title */}
+        {/* App Title and Logo */}
         <Typography
           variant="h6"
           component={RouterLink}
@@ -116,7 +127,8 @@ export default function Navbar() {
               {link.label}
             </Button>
           ))}
-          {/* <Button
+          {/*
+          <Button
             color="info"
             variant="outlined"
             sx={{ ml: 2, fontWeight: 600, borderRadius: 2, px: 2, py: 1 }}
@@ -124,7 +136,8 @@ export default function Navbar() {
             aria-label="Show Onboarding Tour"
           >
             Show Tour
-          </Button> */}
+          </Button>
+          */}
           {isAuthenticated ? (
             <Button
               color="inherit"

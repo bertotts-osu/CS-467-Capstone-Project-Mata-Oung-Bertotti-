@@ -1,9 +1,21 @@
+// Editor.jsx
+// This component wraps the Monaco code editor, providing error handling, default code, and configuration for the coding environment.
+
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import Editor from "@monaco-editor/react";
 import { Box, CircularProgress, Alert } from "@mui/material";
 import ErrorBoundary from "./ErrorBoundary";
 
+/**
+ * CodeEditor component.
+ * Wraps the Monaco code editor with error handling and configuration for the coding environment.
+ * @param {object} props
+ * @param {string} props.value - The code to display in the editor.
+ * @param {function} props.onChange - Handler for code changes.
+ * @param {boolean} [props.readOnly=false] - Whether the editor is read-only.
+ * @param {string} [props.language="python"] - Programming language for syntax highlighting.
+ */
 const CodeEditor = ({
   value,
   onChange,
@@ -12,6 +24,9 @@ const CodeEditor = ({
 }) => {
   const [editorError, setEditorError] = useState(null);
 
+  /**
+   * Handles changes in the editor and calls the onChange prop.
+   */
   const handleEditorChange = (value) => {
     if (onChange) {
       try {
@@ -23,16 +38,24 @@ const CodeEditor = ({
     }
   };
 
+  /**
+   * Clears any previous errors when the editor mounts successfully.
+   */
   const handleEditorDidMount = (editor, monaco) => {
-    // Clear any previous errors when editor mounts successfully
     setEditorError(null);
   };
 
+  /**
+   * Handles errors from the Monaco editor.
+   */
   const handleEditorError = (error) => {
     console.error("Monaco editor error:", error);
     setEditorError("Failed to load code editor. Please refresh the page.");
   };
 
+  /**
+   * Returns a default code template if no value is provided.
+   */
   const getDefaultValue = () => {
     return `def main(*args):
     # Write your solution here.
